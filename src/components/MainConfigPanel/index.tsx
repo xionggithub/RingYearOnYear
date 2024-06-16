@@ -32,6 +32,8 @@ export default function MainConfigPanel({ setRenderData }: IProps) {
   // create时的默认配置
   const [config, setConfig] = useState<ICustomConfig>(defaultConfig);
   const [datasourceRange, setDatasourceRange] = useState<IDataRange[]>([]);
+  const [tableFields, setTableFields] = useState<any[]>([]);
+
 
   useConfig(setConfig).then();
 
@@ -103,11 +105,21 @@ export default function MainConfigPanel({ setRenderData }: IProps) {
       customConfig.tableId = tableList[0]?.value as string;
       const datasourceRange = await dashboard.getTableDataRange(customConfig.tableId)
       setDatasourceRange(datasourceRange)
+      const table = await base.getTable(customConfig.tableId);
+      const fields = (await table.getFieldMetaList()) as any[]
+      console.log(fields, '----');
+      setTableFields(fields)
       await setData(customConfig);
     } else {
       // config 初始化获取配置
       const { dataCondition, customConfig } = await getConfig();
       const newCustomConfig = dataConditionFormatter(dataCondition, customConfig);
+      const datasourceRange = await dashboard.getTableDataRange(customConfig.tableId)
+      setDatasourceRange(datasourceRange)
+      const table = await base.getTable(customConfig.tableId);
+      const fields = (await table.getFieldMetaList()) as any[]
+      console.log(fields, '+++');
+      setTableFields(fields)
       await setData(newCustomConfig, false);
     }
   }
@@ -155,6 +167,7 @@ export default function MainConfigPanel({ setRenderData }: IProps) {
                 <PanelTypeAndData
                   config={config}
                   datasourceRange={datasourceRange}
+                  tableFields={tableFields}
                   setConfig={setConfig}
                   tableList={tableList}
                   dateTypeList={dateTypeList}

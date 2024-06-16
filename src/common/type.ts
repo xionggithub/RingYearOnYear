@@ -26,6 +26,7 @@ export type MomOrYoyCalcType = typeof momOrYoyCalcTypeList[number]['value'];
 export type IconStyleId = typeof iconStyleList[number]['id'];
 export type NumberFormat = typeof dataFormatList[number]['value'];
 export type MomOrYoy = {
+  momOrYoyFieldId: string;
   momOrYoyDesc: string; // 环比/同比指标描述
   manualSetDesc: boolean; // 是否手动设置过指标描述
   momOrYoyCalcMethod: MomOrYoyCalcMethod; // 环比/同比计算方式
@@ -52,6 +53,8 @@ export enum MyFilterDurationEnum {
 export type DateType = FieldType.DateTime | FieldType.CreatedTime | FieldType.ModifiedTime;
 export interface ICustomConfig {
   tableId: string; // 数据源
+  keyIndicatorsFieldId: string;
+  keyIndicatorsRollup: Rollup;
   dateTypeFieldId: string; // 日期类型字段的Id
   datasourceRange: string;
   dateTypeFieldType: DateType; // 日期类型字段的type

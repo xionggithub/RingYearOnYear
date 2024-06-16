@@ -1,39 +1,51 @@
 import './index.scss'
-import { useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Button, Divider, Input, Select } from '@douyinfe/semi-ui';
-import Icon, { IconDeleteStroked, IconPlus } from '@douyinfe/semi-icons';
-import type { ICategory } from '@lark-base-open/js-sdk';
-import {dashboard, IDataRange, SourceType} from "@lark-base-open/js-sdk";
-import { DateType, ICustomConfig, ITableItem, MomOrYoy, Mutable } from '@/common/type';
-import { calculationList, dateRangeList, momOrYoyCalcTypeList, statisticalTypeList } from '@/common/constant';
-import { getMomYoyDesc, getNewMomOrYoyCalcMethodList } from '@/utils';
+import {useRef, useState} from 'react';
+import {useTranslation} from 'react-i18next';
+import {Button, Divider, Input, Select, Dropdown, Tag} from '@douyinfe/semi-ui';
+import Icon, {IconDeleteStroked, IconPlus} from '@douyinfe/semi-icons';
+import type {ICategory} from '@lark-base-open/js-sdk';
+import {base, dashboard, IDataRange, Rollup, SourceType} from "@lark-base-open/js-sdk";
+import {ICustomConfig, ITableItem, MomOrYoy, MomOrYoyCalcMethod, MomOrYoyCalcType, Mutable} from '@/common/type';
+import {momOrYoyCalcTypeList} from '@/common/constant';
+import {getMomYoyDesc, getNewMomOrYoyCalcMethodList} from '@/utils';
 import IconTable from '@/assets/icon_table.svg?react';
 import IconNumber from '@/assets/icon_number.svg?react';
-import IconCalendar from '@/assets/icon_calendar.svg?react';
-import IconCalendarChat from '@/assets/icon_calendar_chat.svg?react';
 
 interface IProps {
   config: ICustomConfig;
   datasourceRange: IDataRange[];
   setConfig: (data: ICustomConfig) => void;
   tableList: ITableItem[];
-  dateTypeList: ICategory[];
+  tableFields: { id: string, name: string, type: number }[];
   numberOrCurrencyList: ICategory[];
   setData: (config: ICustomConfig, tableIdChange: boolean) => void;
 }
 
-export default function PanelTypeAndData({ config, datasourceRange, setConfig, tableList, dateTypeList, numberOrCurrencyList, setData }: IProps) {
+export default function PanelTypeAndData({ config, datasourceRange, setConfig, tableList, tableFields, numberOrCurrencyList, setData }: IProps) {
   const { t } = useTranslation();
 
   const [newMomOrYoyCalcMethodList, setNewMomOrYoyCalcMethodList] = useState(getNewMomOrYoyCalcMethodList(config.dateRange));
 
-  // const [datasourceRange, setDatasourceRange] = useState<IDataRange[]>([]);
+  const [currentFields, setCurrentFields] = useState<{ id: string, name: string, type: number }[]>(tableFields);
+  const [keyIndicatorsFieldId, setKeyIndicatorsFieldId] = useState(config.keyIndicatorsFieldId);
+  const [keyIndicatorsFieldIdRollup, setKeyIndicatorsFieldIdRollup] = useState(config.keyIndicatorsRollup ?? Rollup.SUM);
+
+  const methodList: { keyOfName: string, type: Rollup }[] = [
+    { keyOfName: 'sum', type: Rollup.SUM },
+    { keyOfName: 'average', type: Rollup.AVERAGE },
+    { keyOfName: 'max', type: Rollup.MAX },
+    { keyOfName: 'min', type: Rollup.MIN },
+  ]
 
   const tableChange = async (tableId: any) => {
     config.tableId = tableId;
     datasourceRange = await dashboard.getTableDataRange(tableId);
     console.log(datasourceRange, 'tableChange-------------')
+    const table = await base.getTable(tableId);
+    const tableFields = (await table.getFieldMetaList()) as any[]
+    console.log(tableFields);
+    setCurrentFields(tableFields)
+    setKeyIndicatorsFieldId('')
     setData(config, true);
   }
 
@@ -45,20 +57,7 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
   }
 
   const handlerChange = (key: string, value: any) => {
-    if (key === 'dateTypeFieldId') {
-      const dateTypeFieldType = dateTypeList.find((item) => item.fieldId === value)?.fieldType as DateType;
-      setConfig({ ...config, [key]: value, dateTypeFieldType });
-    }
     setConfig({ ...config, [key]: value });
-  }
-
-  const dateRangeChange = (dateRange: any) => {
-    setNewMomOrYoyCalcMethodList(getNewMomOrYoyCalcMethodList(dateRange));
-    const momOrYoy = config.momOrYoy.map((item) => {
-      item.momOrYoyCalcMethod = 'mom';
-      return item;
-    })
-    setConfig({ ...config, dateRange, momOrYoy });
   }
 
   const momOrYoyItemChange = (item: MomOrYoy, key: string, value: any, index: number) => {
@@ -78,6 +77,7 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
   const addMomOrYoyItem = () => {
     const item: MomOrYoy = {
       momOrYoyDesc: t('momGrowthRate'),
+      momOrYoyFieldId: '',
       manualSetDesc: false,
       momOrYoyCalcMethod: 'mom',
       momOrYoyCalcType: 'differenceRate',
@@ -92,6 +92,28 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
   const deleteMomOrYoyItem = (index: number) => {
     config.momOrYoy.splice(index, 1);
     setConfig({ ...config });
+  }
+
+  const changeComputeMethod = (value) => {
+    config.keyIndicatorsRollup = value
+    setConfig(config)
+    setKeyIndicatorsFieldIdRollup(value)
+  }
+
+  const computeMethodSuffix = () => {
+    return (
+        <Dropdown
+            render={
+              <Dropdown.Menu>
+                <Dropdown.Item>Menu Item 1</Dropdown.Item>
+                <Dropdown.Item>Menu Item 2</Dropdown.Item>
+                <Dropdown.Item>Menu Item 3</Dropdown.Item>
+              </Dropdown.Menu>
+            }
+        >
+          <Tag>Hover Me</Tag>
+        </Dropdown>
+    )
   }
 
   return (
@@ -124,88 +146,67 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
             value={config.datasourceRange} onChange={datasourceRangeChange}>
         </Select>
       </div>
-      <Divider style={{ borderColor: 'var(--divider)', marginTop: '12px' }} />
-      <div className="form-title">{t('dateFiltering')}</div>
-      <div className='form-item'>
-        <div className='form-subTitle'>{t('basis')}</div>
-        <Select
-          placeholder={t('dataPlaceholder')}
-          prefix={<Icon svg={<IconCalendar />} />}
-          value={config.dateTypeFieldId}
-          onChange={(value) => { handlerChange('dateTypeFieldId', value) }}>
-          {dateTypeList.map((item) =>
-            (<Select.Option value={item.fieldId} key={item.fieldId}>{item.fieldName}</Select.Option>))
-          }
-        </Select>
-        <div className='form-item'>
-          <div className='form-subTitle'>{t('range')}</div>
-          <Select
-            optionList={dateRangeList as Mutable<typeof dateRangeList>}
-            prefix={<Icon svg={<IconCalendarChat />} />}
-            value={config.dateRange} onChange={dateRangeChange}>
-          </Select>
-        </div>
-      </div>
-      <div className="form-title">{t('statisticalMethods')}</div>
+      <Divider style={{ borderColor: 'var(--divider)', margin: '20px 0 20px 0' }} />
+
+      <div className="form-title">{t('key_indicators')}</div>
       <div className='form-item'>
         <Select
-          optionList={statisticalTypeList as Mutable<typeof statisticalTypeList>}
-          value={config.statisticalType}
-          onChange={(value) => { handlerChange('statisticalType', value) }}>
+            placeholder={t('key_indicators')}
+            prefix={<Icon svg={<IconNumber />} />}
+            suffix={computeMethodSuffix}
+            value={config.keyIndicatorsFieldId}
+            onChange={(value) => { handlerChange('keyIndicatorsFieldId', value) }}
+            optionList={currentFields.map(item => {
+              return {
+                value: item.id,
+                label: item.name,
+                disabled: item.type !== 2
+              };
+          })}
+        >
         </Select>
       </div>
-      {config.statisticalType === 'number' && (
-        <>
-          <div className='form-item noBorder'>
-            <Select
-              optionList={calculationList as Mutable<typeof calculationList>}
-              value={config.statisticalCalcType}
-              onChange={(value) => handlerChange('statisticalCalcType', value)}>
-            </Select>
-          </div>
-          <div className='form-item'>
-            <Select
-              prefix={<Icon svg={<IconNumber />} />}
-              value={config.numberOrCurrencyFieldId}
-              onChange={(value) => { handlerChange('numberOrCurrencyFieldId', value) }}>
-              {numberOrCurrencyList.map((item) =>
-                (<Select.Option value={item.fieldId} key={item.fieldId}>{item.fieldName}</Select.Option>))
-              }
-            </Select>
-          </div>
-        </>
-      )}
-      <Divider style={{ borderColor: 'var(--divider)', margin: '12px 0 20px 0' }} />
+
       <div className="form-title">
-        <span>{t('mom_yoy')}</span>
+        <span>{t('auxiliary_index')}</span>
         <Button
           disabled={config.momOrYoy.length >= 4}
           theme='borderless'
           icon={<IconPlus size='small' />}
           style={{ fontWeight: 'normal' }}
           onClick={addMomOrYoyItem}>
-          {t('addMom_Yoy')}
+          {t('add_index')}
         </Button>
       </div>
       {
-        config.momOrYoy && config.momOrYoy.map((item, index) => (
+        (config.momOrYoy ?? []).map((item, index) => (
           <div className='form-item bg-grey' key={index}>
             {config.momOrYoy.length > 1 && (
               <div className='icon-delete' onClick={() => { deleteMomOrYoyItem(index) }}>
                 <IconDeleteStroked size='small' />
               </div>
             )}
-            <div className='form-subTitle'>{t('description')}</div>
-            <Input
-              value={item.momOrYoyDesc}
-              onChange={(value) => { momOrYoyItemChange(item, 'momOrYoyDesc', value, index) }} />
-            <div className='form-subTitle'>{t('calculation')}</div>
+            <div className='form-subTitle'>{t('field')}</div>
+            {/*momOrYoyCalcMethod*/}
             <Select
               position='top'
-              optionList={newMomOrYoyCalcMethodList as Mutable<typeof newMomOrYoyCalcMethodList>}
-              value={item.momOrYoyCalcMethod}
-              onChange={(value) => momOrYoyItemChange(item, 'momOrYoyCalcMethod', value, index)}>
+              value={item.momOrYoyFieldId}
+              onChange={(value) =>  momOrYoyItemChange(item, 'momOrYoyFieldId', value, index)}
+              optionList={currentFields.map(item => {
+                return {
+                  value: item.id,
+                  label: item.name,
+                  disabled: item.type !== 2
+                };
+              })}
+            >
             </Select>
+
+            <div className='form-subTitle'>{t('description')}</div>
+            <Input
+                value={item.momOrYoyDesc}
+                onChange={(value) =>  momOrYoyItemChange(item, 'momOrYoyDesc', value, index)} />
+
             <div className='form-subTitle'>{t('calculationType')}</div>
             <Select
               position='top'

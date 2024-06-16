@@ -228,6 +228,8 @@ export const dataFormatList = [
 export const defaultConfig: ICustomConfig = {
   tableId: '',
   dateTypeFieldId: '',
+  keyIndicatorsFieldId: '',
+  datasourceRange: [],
   dateTypeFieldType: FieldType.DateTime,
   dateRange: FilterDuration.Today,
   statisticalType: 'total',
