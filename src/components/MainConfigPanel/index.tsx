@@ -2,7 +2,7 @@ import './index.scss'
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, Toast } from '@douyinfe/semi-ui';
-import { dashboard, DashboardState, base, FieldType } from "@lark-base-open/js-sdk";
+import {dashboard, DashboardState, base, FieldType, IDataRange} from "@lark-base-open/js-sdk";
 import type { ICategory } from '@lark-base-open/js-sdk';
 import { Tabs, TabPane } from '@douyinfe/semi-ui';
 import PanelTypeAndData from './PanelTypeAndData';
@@ -31,8 +31,9 @@ export default function MainConfigPanel({ setRenderData }: IProps) {
 
   // create时的默认配置
   const [config, setConfig] = useState<ICustomConfig>(defaultConfig);
+  const [datasourceRange, setDatasourceRange] = useState<IDataRange[]>([]);
 
-  useConfig(setConfig);
+  useConfig(setConfig).then();
 
   /**保存配置 */
   const onSaveConfig = () => {
@@ -45,7 +46,7 @@ export default function MainConfigPanel({ setRenderData }: IProps) {
     dashboard.saveConfig({
       customConfig: config,
       dataConditions: myDataCondition,
-    } as any);
+    } as any).then();
   }
 
   const [tableList, setTableList] = useState<ITableItem[]>([]);
@@ -83,8 +84,9 @@ export default function MainConfigPanel({ setRenderData }: IProps) {
     const { dateTypeList, numberOrCurrencyList } = await getCategories(customConfig.tableId);
     setDateTypeList(dateTypeList);
     setNumberOrCurrencyList(numberOrCurrencyList);
+    console.log(tableIdChange, dateTypeList, '------++++++++')
     if (tableIdChange) {
-      customConfig.dateTypeFieldId = dateTypeList[0].fieldId || '';
+      customConfig.dateTypeFieldId = dateTypeList[0]?.fieldId || '';
       const isChange = numberOrCurrencyList.length > 0;
       customConfig.statisticalType = isChange ? 'number' : 'total';
       isChange && (customConfig.numberOrCurrencyFieldId = numberOrCurrencyList[0].fieldId);
@@ -98,18 +100,20 @@ export default function MainConfigPanel({ setRenderData }: IProps) {
     if (dashboard.state === DashboardState.Create) {
       // 创建状态，无任务配置
       const customConfig = { ...config };
-      customConfig.tableId = tableList[0]?.value;
-      setData(customConfig);
+      customConfig.tableId = tableList[0]?.value as string;
+      const datasourceRange = await dashboard.getTableDataRange(customConfig.tableId)
+      setDatasourceRange(datasourceRange)
+      await setData(customConfig);
     } else {
       // config 初始化获取配置
       const { dataCondition, customConfig } = await getConfig();
       const newCustomConfig = dataConditionFormatter(dataCondition, customConfig);
-      setData(newCustomConfig, false);
+      await setData(newCustomConfig, false);
     }
   }
 
   useEffect(() => {
-    initData();
+    initData().then();
   }, [getTableList, getCategories]);
 
   // 用于临时存储SDK接口返回的指标数据
@@ -150,6 +154,7 @@ export default function MainConfigPanel({ setRenderData }: IProps) {
               {item.key === '1' && (
                 <PanelTypeAndData
                   config={config}
+                  datasourceRange={datasourceRange}
                   setConfig={setConfig}
                   tableList={tableList}
                   dateTypeList={dateTypeList}

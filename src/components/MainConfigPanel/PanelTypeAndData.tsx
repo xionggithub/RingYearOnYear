@@ -1,11 +1,10 @@
 import './index.scss'
-import { useState, useRef } from 'react';
+import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, Input, Select } from '@douyinfe/semi-ui';
-import Icon, { IconPlus, IconDeleteStroked } from '@douyinfe/semi-icons';
-import { SourceType } from "@lark-base-open/js-sdk";
-import type { IDataRange, ViewDataRange, ICategory } from '@lark-base-open/js-sdk';
-import { Divider } from '@douyinfe/semi-ui';
+import { Button, Divider, Input, Select } from '@douyinfe/semi-ui';
+import Icon, { IconDeleteStroked, IconPlus } from '@douyinfe/semi-icons';
+import type { ICategory } from '@lark-base-open/js-sdk';
+import {dashboard, IDataRange, SourceType} from "@lark-base-open/js-sdk";
 import { DateType, ICustomConfig, ITableItem, MomOrYoy, Mutable } from '@/common/type';
 import { calculationList, dateRangeList, momOrYoyCalcTypeList, statisticalTypeList } from '@/common/constant';
 import { getMomYoyDesc, getNewMomOrYoyCalcMethodList } from '@/utils';
@@ -16,21 +15,33 @@ import IconCalendarChat from '@/assets/icon_calendar_chat.svg?react';
 
 interface IProps {
   config: ICustomConfig;
+  datasourceRange: IDataRange[];
   setConfig: (data: ICustomConfig) => void;
   tableList: ITableItem[];
   dateTypeList: ICategory[];
   numberOrCurrencyList: ICategory[];
-  setData: (config: ICustomConfig) => void;
+  setData: (config: ICustomConfig, tableIdChange: boolean) => void;
 }
 
-export default function PanelTypeAndData({ config, setConfig, tableList, dateTypeList, numberOrCurrencyList, setData }: IProps) {
+export default function PanelTypeAndData({ config, datasourceRange, setConfig, tableList, dateTypeList, numberOrCurrencyList, setData }: IProps) {
   const { t } = useTranslation();
 
   const [newMomOrYoyCalcMethodList, setNewMomOrYoyCalcMethodList] = useState(getNewMomOrYoyCalcMethodList(config.dateRange));
 
+  // const [datasourceRange, setDatasourceRange] = useState<IDataRange[]>([]);
+
   const tableChange = async (tableId: any) => {
     config.tableId = tableId;
-    setData(config);
+    datasourceRange = await dashboard.getTableDataRange(tableId);
+    console.log(datasourceRange, 'tableChange-------------')
+    setData(config, true);
+  }
+
+  const datasourceRangeChange = (range: string) => {
+    console.log(range)
+    config.datasourceRange = range
+    console.log(range, 'datasourceRangeChange-------------')
+    setData(config, false);
   }
 
   const handlerChange = (key: string, value: any) => {
@@ -97,8 +108,20 @@ export default function PanelTypeAndData({ config, setConfig, tableList, dateTyp
       <div className='form-item'>
         <Select
             prefix={<Icon svg={<IconTable />} />}
-            optionList={tableList as Mutable<typeof tableList>}
-            value={config.tableId} onChange={tableChange}>
+            optionList={datasourceRange.map(item => {
+              if (item.type === SourceType.ALL) {
+                return {
+                  value: 'All',
+                  label: t('view_all'),
+                };
+              } else {
+                return {
+                  value: item.viewId,
+                  label: item.viewName,
+                };
+              }
+            })}
+            value={config.datasourceRange} onChange={datasourceRangeChange}>
         </Select>
       </div>
       <Divider style={{ borderColor: 'var(--divider)', marginTop: '12px' }} />

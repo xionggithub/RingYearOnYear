@@ -15,7 +15,7 @@ export interface IMomYoyList {
 export interface IRenderData {
   color: ColorName; // 颜色
   value: string; // 指标数据
-  prefix: string; // 前缀 
+  prefix: string; // 前缀
   suffix: string; // 前缀
   momYoyList: IMomYoyList[]; // 环同比数据
 }
@@ -53,6 +53,7 @@ export type DateType = FieldType.DateTime | FieldType.CreatedTime | FieldType.Mo
 export interface ICustomConfig {
   tableId: string; // 数据源
   dateTypeFieldId: string; // 日期类型字段的Id
+  datasourceRange: string;
   dateTypeFieldType: DateType; // 日期类型字段的type
   dateRange: DateRangeType; // 日期范围
   statisticalType: StatisticalType; // 统计方式

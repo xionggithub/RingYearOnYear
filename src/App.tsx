@@ -20,7 +20,7 @@ export default function App() {
     const [renderData, setRenderData] = useState<IRenderData>({
         color: 'primary', // 指标颜色
         value: '', // 指标数据
-        prefix: '', // 前缀 
+        prefix: '', // 前缀
         suffix: '', // 前缀
         momYoyList: [], // 同比、环比
     });
@@ -53,17 +53,17 @@ export default function App() {
         const { dataCondition, customConfig } = await getConfig();
         const newCustomConfig = dataConditionFormatter(dataCondition, customConfig);
         const value = await getPreviewData(newCustomConfig);
-        renderMainContentData(newCustomConfig, value, setRenderData);
+        await renderMainContentData(newCustomConfig, value, setRenderData);
     }
 
     const dataChangeHandler = async () => {
-        renderMain()
+        await renderMain()
     }
 
     // 展示态
     useEffect(() => {
         if (dashboard.state === DashboardState.View || dashboard.state === DashboardState.FullScreen) {
-            renderMain();
+            renderMain().then();
             dashboard.onDataChange(dataChangeHandler);
         }
     }, []);
