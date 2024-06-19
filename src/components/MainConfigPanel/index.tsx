@@ -92,6 +92,7 @@ export default function MainConfigPanel({ setRenderData }: IProps) {
       const isChange = numberOrCurrencyList.length > 0;
       customConfig.statisticalType = isChange ? 'number' : 'total';
       isChange && (customConfig.numberOrCurrencyFieldId = numberOrCurrencyList[0].fieldId);
+      console.log(tableIdChange, '=========');
     }
     setConfig({ ...customConfig });
   }

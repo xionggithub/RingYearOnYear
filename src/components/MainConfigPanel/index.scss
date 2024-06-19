@@ -46,7 +46,7 @@
 }
 .form-main{
   padding: 15px 20px 0 20px;
-  
+
 }
 .form-title{
   font-size: 14px;
@@ -73,7 +73,7 @@
   flex-direction: column;
   .icon-delete{
     position: absolute;
-    right: 10px; 
+    right: 10px;
     top: 10px;
     cursor: pointer;
     color: var(--ccm-chart-N1000);
@@ -136,23 +136,37 @@
   }
 }
 
-.bg-grey{
-  margin-top: 20px;
-  background-color: var(--ccm-chart-N50);
-  padding: 4px 8px 12px 8px;
-  border-radius: 8px;.semi-select{
-    background-color: #fff;
-    .semi-select-selection-text{
-      color: #000;
-    }
-  }
-  .semi-input-wrapper{
-    background-color: #fff;
-    color: #000;
-  }
-}
+//.bg-grey{
+//  margin-top: 20px;
+//  background-color: var(--ccm-chart-N50);
+//  padding: 4px 8px 12px 8px;
+//  border-radius: 8px;.semi-select{
+//    background-color: #fff;
+//    .semi-select-selection-text{
+//      color: #000;
+//    }
+//  }
+//  .semi-input-wrapper{
+//    background-color: #fff;
+//    color: #000;
+//  }
+//}
 
 .btn {
   align-self: flex-end;
   margin: 0 20px;
+}
+
+.semi-form-vertical .semi-form-field {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.drop-down-tag {
+  margin-right: 10px;
+}
+
+
+.drop-down-select :hover {
+    background-color: transparent;
 }

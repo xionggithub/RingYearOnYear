@@ -1,5 +1,5 @@
 import './App.scss';
-import { dashboard, DashboardState } from "@lark-base-open/js-sdk";
+import { dashboard, DashboardState, bitable } from "@lark-base-open/js-sdk";
 import './locales/i18n';
 import 'dayjs/locale/zh-cn';
 import 'dayjs/locale/en';
@@ -49,6 +49,10 @@ export default function App() {
     //     }
     // }
 
+    function updateTheme(theme: string) {
+        document.body.setAttribute('theme-mode', theme);
+    }
+
     const renderMain = async () => {
         const { dataCondition, customConfig } = await getConfig();
         const newCustomConfig = dataConditionFormatter(dataCondition, customConfig);
@@ -62,6 +66,13 @@ export default function App() {
 
     // 展示态
     useEffect(() => {
+        bitable.bridge.getTheme().then(theme => {
+            updateTheme(theme.toLocaleLowerCase())
+        });
+        bitable.bridge.onThemeChange((event) => {
+            console.log('theme change', event.data.theme);
+            updateTheme(event.data.theme.toLocaleLowerCase())
+        });
         if (dashboard.state === DashboardState.View || dashboard.state === DashboardState.FullScreen) {
             renderMain().then();
             dashboard.onDataChange(dataChangeHandler);

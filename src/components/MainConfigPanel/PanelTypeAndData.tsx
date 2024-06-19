@@ -1,7 +1,7 @@
 import './index.scss'
 import {useRef, useState} from 'react';
 import {useTranslation} from 'react-i18next';
-import {Button, Divider, Input, Select, Dropdown, Tag} from '@douyinfe/semi-ui';
+import {Button, Divider, Input, Form, Select, Dropdown, Tag} from '@douyinfe/semi-ui';
 import Icon, {IconDeleteStroked, IconPlus} from '@douyinfe/semi-icons';
 import type {ICategory} from '@lark-base-open/js-sdk';
 import {base, dashboard, IDataRange, Rollup, SourceType} from "@lark-base-open/js-sdk";
@@ -42,8 +42,9 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
     datasourceRange = await dashboard.getTableDataRange(tableId);
     console.log(datasourceRange, 'tableChange-------------')
     const table = await base.getTable(tableId);
+    console.log(table, 'get table for ', tableId)
     const tableFields = (await table.getFieldMetaList()) as any[]
-    console.log(tableFields);
+    console.log(tableFields, 'get fields for', tableId);
     setCurrentFields(tableFields)
     setKeyIndicatorsFieldId('')
     setData(config, true);
@@ -100,24 +101,12 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
     setKeyIndicatorsFieldIdRollup(value)
   }
 
-  const computeMethodSuffix = () => {
-    return (
-        <Dropdown
-            render={
-              <Dropdown.Menu>
-                <Dropdown.Item>Menu Item 1</Dropdown.Item>
-                <Dropdown.Item>Menu Item 2</Dropdown.Item>
-                <Dropdown.Item>Menu Item 3</Dropdown.Item>
-              </Dropdown.Menu>
-            }
-        >
-          <Tag>Hover Me</Tag>
-        </Dropdown>
-    )
+  const dropItemClick = (e) => {
+
   }
 
   return (
-    <div className="form-main">
+    <Form className="form-main">
       <div className="form-title">{t('dataSource')}</div>
       <div className='form-item'>
         <Select
@@ -150,10 +139,42 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
 
       <div className="form-title">{t('key_indicators')}</div>
       <div className='form-item'>
-        <Select
+        <Form.Select
+            noLabel={true}
+            className='drop-down-select'
+            field='keyIndicators'
             placeholder={t('key_indicators')}
             prefix={<Icon svg={<IconNumber />} />}
-            suffix={computeMethodSuffix}
+            showArrow={false}
+            suffix={
+              <Dropdown
+                  className='select-suffix'
+                  position='bottomRight'
+                  trigger={'click'}
+                  stopPropagation={true}
+                  clickToHide={true}
+                render={
+                  <Dropdown.Menu>
+                    { methodList.map(item => {
+                      return (<Dropdown.Item key={item.type}
+                          onClick={(event) => {
+                            const data = event.target.textContent;
+                            const findItem = methodList.find(tempItem => t(tempItem.keyOfName) === data);
+                            if (findItem) {
+                              console.log(findItem.type)
+                            }
+                          }}
+                      >{ t(item.keyOfName) }
+                      </Dropdown.Item>)
+                    }) }
+                  </Dropdown.Menu>
+                }
+            >
+              <Tag className="drop-down-tag" onClick={(e) => {
+                e.stopPropagation();
+              }}
+              >Hover Me</Tag>
+            </Dropdown>}
             value={config.keyIndicatorsFieldId}
             onChange={(value) => { handlerChange('keyIndicatorsFieldId', value) }}
             optionList={currentFields.map(item => {
@@ -163,8 +184,7 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
                 disabled: item.type !== 2
               };
           })}
-        >
-        </Select>
+        />
       </div>
 
       <div className="form-title">
@@ -188,7 +208,9 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
             )}
             <div className='form-subTitle'>{t('field')}</div>
             {/*momOrYoyCalcMethod*/}
-            <Select
+            <Form.Select
+              noLabel={true}
+              field={'momOrYoyFieldId' + index}
               position='top'
               value={item.momOrYoyFieldId}
               onChange={(value) =>  momOrYoyItemChange(item, 'momOrYoyFieldId', value, index)}
@@ -200,7 +222,7 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
                 };
               })}
             >
-            </Select>
+            </Form.Select>
 
             <div className='form-subTitle'>{t('description')}</div>
             <Input
@@ -208,16 +230,18 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
                 onChange={(value) =>  momOrYoyItemChange(item, 'momOrYoyDesc', value, index)} />
 
             <div className='form-subTitle'>{t('calculationType')}</div>
-            <Select
+            <Form.Select
+              noLabel={true}
+              field={'momOrYoyCalcType' + index}
               position='top'
               optionList={momOrYoyCalcTypeList as Mutable<typeof momOrYoyCalcTypeList>}
               value={item.momOrYoyCalcType}
               onChange={(value) => momOrYoyItemChange(item, 'momOrYoyCalcType', value, index)}>
-            </Select>
+            </Form.Select>
             <div ref={scrollToBottomRef}></div>
           </div>
         ))
       }
-    </div>
+    </Form>
   )
 }
