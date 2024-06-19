@@ -29,7 +29,8 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
   const [currentFields, setCurrentFields] = useState<{ id: string, name: string, type: number }[]>(tableFields);
   const [keyIndicatorsFieldId, setKeyIndicatorsFieldId] = useState(config.keyIndicatorsFieldId);
   const [keyIndicatorsFieldIdRollup, setKeyIndicatorsFieldIdRollup] = useState(config.keyIndicatorsRollup ?? Rollup.SUM);
-
+  const [dataRange, setDataRange] = useState<IDataRange[]>(datasourceRange)
+  const [dataRangeId, setDataRangeId] = useState<string>(config.datasourceRange)
   const methodList: { keyOfName: string, type: Rollup }[] = [
     { keyOfName: 'sum', type: Rollup.SUM },
     { keyOfName: 'average', type: Rollup.AVERAGE },
@@ -39,7 +40,10 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
 
   const tableChange = async (tableId: any) => {
     config.tableId = tableId;
-    datasourceRange = await dashboard.getTableDataRange(tableId);
+    const datasourceRange = await dashboard.getTableDataRange(tableId);
+    setDataRange(datasourceRange)
+    setDataRangeId('All')
+    config.datasourceRange = ''
     console.log(datasourceRange, 'tableChange-------------')
     const table = await base.getTable(tableId);
     console.log(table, 'get table for ', tableId)
@@ -109,17 +113,20 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
     <Form className="form-main">
       <div className="form-title">{t('dataSource')}</div>
       <div className='form-item'>
-        <Select
+        <Form.Select noLabel={true}
+                     field='dataSource'
           prefix={<Icon svg={<IconTable />} />}
           optionList={tableList as Mutable<typeof tableList>}
           value={config.tableId} onChange={tableChange}>
-        </Select>
+        </Form.Select>
       </div>
       <div className="form-title">{t('dataRange')}</div>
       <div className='form-item'>
-        <Select
+        <Form.Select
             prefix={<Icon svg={<IconTable />} />}
-            optionList={datasourceRange.map(item => {
+            noLabel={true}
+            field='dataRange'
+            optionList={dataRange.map(item => {
               if (item.type === SourceType.ALL) {
                 return {
                   value: 'All',
@@ -132,8 +139,8 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
                 };
               }
             })}
-            value={config.datasourceRange} onChange={datasourceRangeChange}>
-        </Select>
+            value={dataRangeId} onChange={datasourceRangeChange}>
+        </Form.Select>
       </div>
       <Divider style={{ borderColor: 'var(--divider)', margin: '20px 0 20px 0' }} />
 
