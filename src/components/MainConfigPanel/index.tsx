@@ -2,21 +2,21 @@ import './index.scss'
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, Toast } from '@douyinfe/semi-ui';
-import {dashboard, DashboardState, base, FieldType, IDataRange} from "@lark-base-open/js-sdk";
+import {dashboard, DashboardState, base, FieldType, IDataRange, IDataCondition} from "@lark-base-open/js-sdk";
 import type { ICategory } from '@lark-base-open/js-sdk';
 import { Tabs, TabPane } from '@douyinfe/semi-ui';
 import PanelTypeAndData from './PanelTypeAndData';
 import PanelCustomStyle from './PanelCustomStyle';
 import type { ICustomConfig, IRenderData, ITableItem } from '@/common/type';
 import { useConfig } from '@/hooks';
-import { defaultConfig } from '@/common/constant';
-import { configFormatter, dataConditionFormatter, getConfig, getPreviewData, renderMainContentData } from '@/utils';
+import { configFormatter, getPreviewData, renderMainContentData } from '@/utils';
 import { debounce } from 'lodash-es';
 
 interface IProps {
   setRenderData: (data: IRenderData) => void;
+  initializeConfig: ICustomConfig;
 }
-export default function MainConfigPanel({ setRenderData }: IProps) {
+export default function MainConfigPanel({ setRenderData, initializeConfig }: IProps) {
   const { t } = useTranslation();
   const tabList = [
     {
@@ -30,30 +30,31 @@ export default function MainConfigPanel({ setRenderData }: IProps) {
   ];
 
   // create时的默认配置
-  const [config, setConfig] = useState<ICustomConfig>(defaultConfig);
+  const [config, setConfig] = useState<ICustomConfig>(initializeConfig);
   const [datasourceRange, setDatasourceRange] = useState<IDataRange[]>([]);
   const [tableFields, setTableFields] = useState<any[]>([]);
+  const [tableList, setTableList] = useState<ITableItem[]>([]);
 
 
   useConfig(setConfig).then();
 
   /**保存配置 */
   const onSaveConfig = () => {
-    if (!config.dateTypeFieldId) {
+    console.log('save config', JSON.stringify(config), JSON.parse(JSON.stringify(config)))
+    if (!config.keyIndicatorsFieldId) {
       Toast.error(t('dataPlaceholder'));
       return;
     }
     // 目前只持存保存一份查询配置
-    const myDataCondition = configFormatter(config)[0];
+    const dataConditions: IDataCondition[] = configFormatter(config)
     dashboard.saveConfig({
       customConfig: config,
-      dataConditions: myDataCondition,
-    } as any).then();
+      dataConditions: dataConditions,//myDataCondition,
+    } as any).then((res) => {
+      console.log('save config res', res)
+    });
   }
 
-  const [tableList, setTableList] = useState<ITableItem[]>([]);
-  const [dateTypeList, setDateTypeList] = useState<ICategory[]>([]);
-  const [numberOrCurrencyList, setNumberOrCurrencyList] = useState<ICategory[]>([]);
 
   const getTableList = useCallback(async () => {
     const baseTableList = await base.getTableList();
@@ -67,67 +68,30 @@ export default function MainConfigPanel({ setRenderData }: IProps) {
     return resultList;
   }, []);
 
-  const getCategories = useCallback(async (tableId: string) => {
-    const categories = await dashboard.getCategories(tableId);
-    const FieldTypes = [FieldType.DateTime, FieldType.CreatedTime, FieldType.ModifiedTime];
-    const dateTypeList = categories.filter(item => FieldTypes.includes(item.fieldType)) || [];
-    const numberOrCurrencyTypes = [FieldType.Number, FieldType.Currency];
-    const numberOrCurrencyList = categories.filter(item => numberOrCurrencyTypes.includes(item.fieldType)) || [];
-    return {
-      dateTypeList,
-      numberOrCurrencyList,
-    };
-  }, []);
-
-  /**
-   * 当tableID变化后，需要根据config的配置重新设置所有依赖数据
-  */
-  const setData = async (customConfig: ICustomConfig, tableIdChange: boolean = true) => {
-    const { dateTypeList, numberOrCurrencyList } = await getCategories(customConfig.tableId);
-    setDateTypeList(dateTypeList);
-    setNumberOrCurrencyList(numberOrCurrencyList);
-    console.log(tableIdChange, dateTypeList, '------++++++++')
-    if (tableIdChange) {
-      customConfig.dateTypeFieldId = dateTypeList[0]?.fieldId || '';
-      const isChange = numberOrCurrencyList.length > 0;
-      customConfig.statisticalType = isChange ? 'number' : 'total';
-      isChange && (customConfig.numberOrCurrencyFieldId = numberOrCurrencyList[0].fieldId);
-      console.log(tableIdChange, '=========');
-    }
-    setConfig({ ...customConfig });
-  }
-
   const initData = async () => {
     const tableList = await getTableList();
+    console.log(tableList, '----');
     setTableList(tableList);
-    if (dashboard.state === DashboardState.Create) {
+    const customConfig = { ...config };
+    if (dashboard.state === DashboardState.Create || customConfig.tableId.length ===0) {
       // 创建状态，无任务配置
-      const customConfig = { ...config };
       customConfig.tableId = tableList[0]?.value as string;
-      const datasourceRange = await dashboard.getTableDataRange(customConfig.tableId)
-      setDatasourceRange(datasourceRange)
-      const table = await base.getTable(customConfig.tableId);
-      const fields = (await table.getFieldMetaList()) as any[]
-      console.log(fields, '----');
-      setTableFields(fields)
-      await setData(customConfig);
-    } else {
-      // config 初始化获取配置
-      const { dataCondition, customConfig } = await getConfig();
-      const newCustomConfig = dataConditionFormatter(dataCondition, customConfig);
-      const datasourceRange = await dashboard.getTableDataRange(customConfig.tableId)
-      setDatasourceRange(datasourceRange)
-      const table = await base.getTable(customConfig.tableId);
-      const fields = (await table.getFieldMetaList()) as any[]
-      console.log(fields, '+++');
-      setTableFields(fields)
-      await setData(newCustomConfig, false);
     }
+    if (!customConfig.tableId) {
+      setConfig({...customConfig})
+      return;
+    }
+    const datasourceRange = await dashboard.getTableDataRange(customConfig.tableId)
+    setDatasourceRange(datasourceRange)
+    const table = await base.getTable(customConfig.tableId);
+    const fields = (await table.getFieldMetaList()) as any[]
+    setTableFields(fields)
+    setConfig({...customConfig})
   }
 
   useEffect(() => {
     initData().then();
-  }, [getTableList, getCategories]);
+  }, []);
 
   // 用于临时存储SDK接口返回的指标数据
   const [valueArr, setValueArr] = useState<number[]>([]);
@@ -144,7 +108,7 @@ export default function MainConfigPanel({ setRenderData }: IProps) {
   // 类型与数据面板变化，依赖base SDK接口的数据计算，重新获取指标数据
   useEffect(() => {
     renderMainDataDebounce();
-  }, [config.tableId, config.dateTypeFieldId, config.dateTypeFieldType, config.dateRange, config.statisticalType, config.numberOrCurrencyFieldId, config.statisticalCalcType, JSON.stringify(config.momOrYoy)]);
+  }, [config.tableId, config.keyIndicatorsFieldId, config.keyIndicatorsRollup, config.datasourceRange, JSON.stringify(config.momOrYoy)]);
 
 
   const renderMainStyleDebounce = debounce(() => {
@@ -171,9 +135,6 @@ export default function MainConfigPanel({ setRenderData }: IProps) {
                   tableFields={tableFields}
                   setConfig={setConfig}
                   tableList={tableList}
-                  dateTypeList={dateTypeList}
-                  numberOrCurrencyList={numberOrCurrencyList}
-                  setData={setData}
                 />
               )}
               {item.key === '2' && <PanelCustomStyle config={config} setConfig={setConfig} />}

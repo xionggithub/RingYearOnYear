@@ -1,5 +1,5 @@
 import './index.scss'
-import {useRef, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {Button, Divider, Input, Form, Select, Dropdown, Tag} from '@douyinfe/semi-ui';
 import Icon, {IconDeleteStroked, IconPlus} from '@douyinfe/semi-icons';
@@ -17,15 +17,11 @@ interface IProps {
   setConfig: (data: ICustomConfig) => void;
   tableList: ITableItem[];
   tableFields: { id: string, name: string, type: number }[];
-  numberOrCurrencyList: ICategory[];
-  setData: (config: ICustomConfig, tableIdChange: boolean) => void;
 }
 
-export default function PanelTypeAndData({ config, datasourceRange, setConfig, tableList, tableFields, numberOrCurrencyList, setData }: IProps) {
+export default function PanelTypeAndData({ config, datasourceRange, setConfig, tableList, tableFields }: IProps) {
   const { t } = useTranslation();
-
-  const [newMomOrYoyCalcMethodList, setNewMomOrYoyCalcMethodList] = useState(getNewMomOrYoyCalcMethodList(config.dateRange));
-
+  const [tableId, setTableId] = useState<string>(config.tableId);
   const [currentFields, setCurrentFields] = useState<{ id: string, name: string, type: number }[]>(tableFields);
   const [keyIndicatorsFieldId, setKeyIndicatorsFieldId] = useState(config.keyIndicatorsFieldId);
   const [keyIndicatorsFieldIdRollup, setKeyIndicatorsFieldIdRollup] = useState(config.keyIndicatorsRollup ?? Rollup.SUM);
@@ -38,31 +34,43 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
     { keyOfName: 'min', type: Rollup.MIN },
   ]
 
+  useEffect(() => {
+    setTableId(config.tableId)
+    setDataRangeId(config.datasourceRange)
+  }, [config])
+
+  useEffect(() => {
+    setCurrentFields(tableFields)
+  }, [tableFields])
+
+  useEffect(() => {
+    setDataRange(datasourceRange)
+  }, [datasourceRange])
+
   const tableChange = async (tableId: any) => {
     config.tableId = tableId;
+    setTableId(tableId)
     const datasourceRange = await dashboard.getTableDataRange(tableId);
     setDataRange(datasourceRange)
     setDataRangeId('All')
     config.datasourceRange = ''
-    console.log(datasourceRange, 'tableChange-------------')
+    setConfig({...config })
     const table = await base.getTable(tableId);
-    console.log(table, 'get table for ', tableId)
     const tableFields = (await table.getFieldMetaList()) as any[]
-    console.log(tableFields, 'get fields for', tableId);
     setCurrentFields(tableFields)
     setKeyIndicatorsFieldId('')
-    setData(config, true);
   }
 
   const datasourceRangeChange = (range: string) => {
-    console.log(range)
     config.datasourceRange = range
-    console.log(range, 'datasourceRangeChange-------------')
-    setData(config, false);
+    setConfig({...config })
   }
 
   const handlerChange = (key: string, value: any) => {
     setConfig({ ...config, [key]: value });
+    if (key === 'keyIndicatorsFieldId') {
+      setKeyIndicatorsFieldId(value)
+    }
   }
 
   const momOrYoyItemChange = (item: MomOrYoy, key: string, value: any, index: number) => {
@@ -78,7 +86,7 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
     setConfig({ ...config });
   }
 
-  const scrollToBottomRef = useRef<HTMLDivElement>(null);
+  const scrollToBottomRef = useRef<HTMLDivElement | null>(null);
   const addMomOrYoyItem = () => {
     const item: MomOrYoy = {
       momOrYoyDesc: t('momGrowthRate'),
@@ -86,7 +94,8 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
       manualSetDesc: false,
       momOrYoyCalcMethod: 'mom',
       momOrYoyCalcType: 'differenceRate',
-    }
+      indicatorsRollup: 'SUM'
+    } as MomOrYoy
     config.momOrYoy.push(item);
     setConfig({ ...config });
     setTimeout(() => {
@@ -105,19 +114,18 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
     setKeyIndicatorsFieldIdRollup(value)
   }
 
-  const dropItemClick = (e) => {
-
-  }
-
   return (
     <Form className="form-main">
       <div className="form-title">{t('dataSource')}</div>
       <div className='form-item'>
-        <Form.Select noLabel={true}
-                     field='dataSource'
-          prefix={<Icon svg={<IconTable />} />}
-          optionList={tableList as Mutable<typeof tableList>}
-          value={config.tableId} onChange={tableChange}>
+        <Form.Select
+            noLabel={true}
+            field='dataSource'
+            prefix={<Icon svg={<IconTable />} />}
+            optionList={tableList as Mutable<typeof tableList>}
+            value={tableId}
+            initValue={tableId}
+            onChange={tableChange}>
         </Form.Select>
       </div>
       <div className="form-title">{t('dataRange')}</div>
@@ -139,7 +147,9 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
                 };
               }
             })}
-            value={dataRangeId} onChange={datasourceRangeChange}>
+            value={dataRangeId}
+            initValue={dataRangeId}
+            onChange={datasourceRangeChange}>
         </Form.Select>
       </div>
       <Divider style={{ borderColor: 'var(--divider)', margin: '20px 0 20px 0' }} />
@@ -169,6 +179,9 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
                             const findItem = methodList.find(tempItem => t(tempItem.keyOfName) === data);
                             if (findItem) {
                               console.log(findItem.type)
+                              config.keyIndicatorsRollup = findItem.type
+                              setConfig({...config })
+                              setKeyIndicatorsFieldIdRollup(findItem.type)
                             }
                           }}
                       >{ t(item.keyOfName) }
@@ -180,9 +193,12 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
               <Tag className="drop-down-tag" onClick={(e) => {
                 e.stopPropagation();
               }}
-              >Hover Me</Tag>
+              >{
+                t(methodList.find(item => item.type === keyIndicatorsFieldIdRollup)?.keyOfName)
+              }</Tag>
             </Dropdown>}
-            value={config.keyIndicatorsFieldId}
+            value={keyIndicatorsFieldId}
+            initValue={keyIndicatorsFieldId}
             onChange={(value) => { handlerChange('keyIndicatorsFieldId', value) }}
             optionList={currentFields.map(item => {
               return {
@@ -217,9 +233,12 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
             {/*momOrYoyCalcMethod*/}
             <Form.Select
               noLabel={true}
+              prefix={<Icon svg={<IconNumber />} />}
               field={'momOrYoyFieldId' + index}
+              placeholder={t('auxiliary_index')}
               position='top'
               value={item.momOrYoyFieldId}
+              initValue={item.momOrYoyFieldId}
               onChange={(value) =>  momOrYoyItemChange(item, 'momOrYoyFieldId', value, index)}
               optionList={currentFields.map(item => {
                 return {
@@ -228,6 +247,40 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
                   disabled: item.type !== 2
                 };
               })}
+              showArrow={false}
+              suffix={
+                <Dropdown
+                    className='select-suffix'
+                    position='bottomRight'
+                    trigger={'click'}
+                    stopPropagation={true}
+                    clickToHide={true}
+                    render={
+                      <Dropdown.Menu>
+                        { methodList.map(dropItem => {
+                          return (<Dropdown.Item key={dropItem.type}
+                                                 onClick={(event) => {
+                                                   const data = event.target.textContent;
+                                                   const findItem = methodList.find(tempItem => t(tempItem.keyOfName) === data);
+                                                   if (findItem) {
+                                                     console.log(findItem.type)
+                                                     momOrYoyItemChange(item, 'indicatorsRollup', findItem.type, index)
+                                                     setConfig({...config })
+                                                   }
+                                                 }}
+                          >{ t(dropItem.keyOfName) }
+                          </Dropdown.Item>)
+                        }) }
+                      </Dropdown.Menu>
+                    }
+                >
+                  <Tag className="drop-down-tag" onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                  >{
+                    t(methodList.find(dropItem => dropItem.type === item.indicatorsRollup )?.keyOfName)
+                  }</Tag>
+                </Dropdown>}
             >
             </Form.Select>
 
@@ -243,6 +296,7 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
               position='top'
               optionList={momOrYoyCalcTypeList as Mutable<typeof momOrYoyCalcTypeList>}
               value={item.momOrYoyCalcType}
+              initValue={item.momOrYoyCalcType}
               onChange={(value) => momOrYoyItemChange(item, 'momOrYoyCalcType', value, index)}>
             </Form.Select>
             <div ref={scrollToBottomRef}></div>

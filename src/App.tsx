@@ -1,5 +1,5 @@
 import './App.scss';
-import { dashboard, DashboardState, bitable } from "@lark-base-open/js-sdk";
+import {dashboard, DashboardState, bitable, IDataCondition} from "@lark-base-open/js-sdk";
 import './locales/i18n';
 import 'dayjs/locale/zh-cn';
 import 'dayjs/locale/en';
@@ -10,12 +10,18 @@ import MainConfigPanel from './components/MainConfigPanel';
 import { useState, useEffect, useRef } from 'react';
 import type { IRenderData } from '@/common/type';
 import { dataConditionFormatter, getConfig, getPreviewData, renderMainContentData } from './utils';
+import Icon, {IconDeleteStroked, IconPlus} from '@douyinfe/semi-icons';
+import IconLoading from './assets/icon_loading.svg?react';
+import {ICustomConfig} from "@/common/type";
+import {defaultConfig} from "@/common/constant";
 
 export default function App() {
     useTheme();
 
     /** 是否配置/创建模式下 */
     const isConfig = dashboard.state === DashboardState.Config || dashboard.state === DashboardState.Create;
+    const [isLoading, setIsLoading] = useState(true)
+    const [config, setConfig] = useState<ICustomConfig>(defaultConfig);
 
     const [renderData, setRenderData] = useState<IRenderData>({
         color: 'primary', // 指标颜色
@@ -27,62 +33,47 @@ export default function App() {
 
     const mainDomRef = useRef<HTMLDivElement>(null);
 
-    // 因接口限制，需要手动拼接多次saveConfig和getData会触发多次configChange事件
-    // 又因为configChange事件不是立即触发，需要设置延时，在延时范围内不触发change事件，暂定3000毫秒
-    // let delayedTime = 3000;
-    // let dataChangeFlag = false;
-
-    // const renderMain = async () => {
-    //     dataChangeFlag = true;
-    //     const { dataCondition, customConfig } = await getConfig();
-    //     const newCustomConfig = dataConditionFormatter(dataCondition, customConfig);
-    //     const value = await getData(dataCondition, customConfig);
-    //     renderMainContentData(newCustomConfig, value, setRenderData);
-    //     setTimeout(() => {
-    //         dataChangeFlag = false;
-    //     }, delayedTime)
-    // }
-
-    // const dataChangeHandler = async () => {
-    //     if (!dataChangeFlag) {
-    //         renderMain()
-    //     }
-    // }
-
-    function updateTheme(theme: string) {
-        document.body.setAttribute('theme-mode', theme);
-    }
-
     const renderMain = async () => {
-        const { dataCondition, customConfig } = await getConfig();
-        const newCustomConfig = dataConditionFormatter(dataCondition, customConfig);
-        const value = await getPreviewData(newCustomConfig);
-        await renderMainContentData(newCustomConfig, value, setRenderData);
-    }
-
-    const dataChangeHandler = async () => {
-        await renderMain()
+        const customConfig = await getConfig();
+        console.log('render main get config', customConfig)
+        setConfig(customConfig)
+        if (customConfig.tableId.length > 0) {
+            // 读取缓存配置 解析渲染数据
+            const value = await getPreviewData(customConfig);
+            await renderMainContentData(customConfig, value, setRenderData);
+        } else {
+            // 保存数据异常则不处理
+        }
     }
 
     // 展示态
     useEffect(() => {
-        bitable.bridge.getTheme().then(theme => {
-            updateTheme(theme.toLocaleLowerCase())
-        });
-        bitable.bridge.onThemeChange((event) => {
-            console.log('theme change', event.data.theme);
-            updateTheme(event.data.theme.toLocaleLowerCase())
-        });
-        if (dashboard.state === DashboardState.View || dashboard.state === DashboardState.FullScreen) {
-            renderMain().then();
-            dashboard.onDataChange(dataChangeHandler);
+        console.log('state--state--state---state-',dashboard.state)
+        if (DashboardState.Create !== dashboard.state) {
+            renderMain().then(() => {
+                setIsLoading(false)
+            });
+        } else {
+            setIsLoading(false)
         }
+        dashboard.onDataChange((data) => {
+            if (DashboardState.Create !== dashboard.state) {
+                renderMain().then();
+            }
+        });
     }, []);
 
-    return (
-        <main className={classnames(isConfig ? 'top-border' : '', 'main')} ref={mainDomRef}>
+    return isLoading ?
+        (<div style={{ width: '100%', height: '100%', display: 'grid', alignItems: 'center', justifyItems: 'center' }}>
+            <div style={{ width: 'max-content', height: 'max-content', display: 'flex', flexDirection: 'column', alignItems: 'center', rowGap: '10px', justifyItems: 'center' }}>
+                <Icon svg={<IconLoading />} />
+                <div style={{textAlign: 'center', fontSize: '16px'}}>加载中...</div>
+            </div>
+        </div>) :
+        (<main className={classnames(isConfig ? 'top-border' : '', 'main')} ref={mainDomRef}>
             <MainContent renderData={renderData} mainDomRef={mainDomRef} />
-            {isConfig && <MainConfigPanel setRenderData={setRenderData} />}
-        </main>
-    )
+            {isConfig && <MainConfigPanel setRenderData={setRenderData}
+                                          initializeConfig={config}
+            />}
+        </main>)
 }

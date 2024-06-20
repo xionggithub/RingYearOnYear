@@ -206,7 +206,7 @@ export const icons = {
   IconArrowDownRight
 } as const;
 
-export const dataFormatList = [
+export const dataFormatList: { label: string, value: string }[] = [
   {
     label: t('numberMillennials'),
     value: 'numberMillennials',
@@ -223,24 +223,21 @@ export const dataFormatList = [
     label: t('millageRate'),
     value: 'millageRate',
   },
-] as const;
+] as { label: string, value: string }[];
 
 export const defaultConfig: ICustomConfig = {
   tableId: '',
-  dateTypeFieldId: '',
   keyIndicatorsFieldId: '',
-  datasourceRange: [],
-  dateTypeFieldType: FieldType.DateTime,
-  dateRange: FilterDuration.Today,
-  statisticalType: 'total',
-  numberOrCurrencyFieldId: '',
-  statisticalCalcType: Rollup.SUM,
+  keyIndicatorsRollup: 'SUM',
+  datasourceRange: '',
   momOrYoy: [
     {
       momOrYoyDesc: t('momGrowthRate'),
       manualSetDesc: false,
       momOrYoyCalcMethod: 'mom',
       momOrYoyCalcType: 'differenceRate',
+      momOrYoyFieldId: '',
+      indicatorsRollup: 'SUM'
     }
   ],
   color: 'primary',
@@ -249,4 +246,4 @@ export const defaultConfig: ICustomConfig = {
   numberFormat: 'number',
   prefix: '',
   suffix: '',
-}
+} as ICustomConfig;

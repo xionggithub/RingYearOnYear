@@ -39,10 +39,8 @@ export default function LoadApp(props: { neverShowBanner?: boolean, children: Re
     return props.children || null;
   }
 
-  return <div>
-    <LocaleProvider locale={locale}>
-      {props.children}
-    </LocaleProvider>
-  </div>
+  return <LocaleProvider locale={locale}>
+    {props.children}
+  </LocaleProvider>
 }
 

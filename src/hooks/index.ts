@@ -25,7 +25,7 @@ const updateConfig = (config: ICustomConfig, setConfig: (config: ICustomConfig) 
     setConfig(config as ICustomConfig);
     setTimeout(() => {
       // 预留3s给浏览器进行渲染，3s后告知服务端可以进行截图了
-      dashboard.setRendered();
+      dashboard.setRendered().then();
     }, 3000);
   }
 }

@@ -31,6 +31,7 @@ export type MomOrYoy = {
   manualSetDesc: boolean; // 是否手动设置过指标描述
   momOrYoyCalcMethod: MomOrYoyCalcMethod; // 环比/同比计算方式
   momOrYoyCalcType: MomOrYoyCalcType; // 环比/同比计算类型
+  indicatorsRollup: Rollup;
 };
 export enum MyFilterDurationEnum {
   /** 本季度 */
@@ -55,13 +56,7 @@ export interface ICustomConfig {
   tableId: string; // 数据源
   keyIndicatorsFieldId: string;
   keyIndicatorsRollup: Rollup;
-  dateTypeFieldId: string; // 日期类型字段的Id
   datasourceRange: string;
-  dateTypeFieldType: DateType; // 日期类型字段的type
-  dateRange: DateRangeType; // 日期范围
-  statisticalType: StatisticalType; // 统计方式
-  numberOrCurrencyFieldId: string; // 统计数值字段类型
-  statisticalCalcType: Rollup; // 统计计算类型
   momOrYoy: MomOrYoy[]; // 环同比
   color: ColorName; // 颜色
   iconStyleId: IconStyleId; // 图标样式

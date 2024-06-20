@@ -1,5 +1,15 @@
-import { iconStyleList, icons, momOrYoyCalcMethodList } from '@/common/constant';
-import { FilterConjunction, FilterDuration, FilterOperator, IDataCondition, IDataRange, ISeries, SourceType, dashboard } from "@lark-base-open/js-sdk";
+import {iconStyleList, icons, momOrYoyCalcMethodList, defaultConfig} from '@/common/constant';
+import {
+  FilterConjunction,
+  FilterDuration,
+  FilterOperator,
+  IDataCondition,
+  IDataRange,
+  ISeries,
+  SourceType,
+  dashboard,
+  DashboardState
+} from "@lark-base-open/js-sdk";
 import { DateRangeType, ICustomConfig, IMomYoyList, IRenderData, IconColor, IconStyleId, MomOrYoy, MomOrYoyCalcMethod, MomOrYoyCalcType, MyFilterDurationEnum, NumberFormat } from '@/common/type'
 import dayjs from 'dayjs';
 import quarterOfYear from 'dayjs/plugin/quarterOfYear'
@@ -176,7 +186,7 @@ export const getDateRangeTimestamp = (dateTypeRange: DateRangeType) => {
       const endTime = dayjs().endOf('day').valueOf();
       return { startTime, endTime };
     },
-  }
+  } as DateTypeRangeMap
   return dateTypeRangeMap[dateTypeRange]();
 }
 
@@ -304,87 +314,97 @@ export const getMomYoyCalcResult = (calcType: MomOrYoyCalcType, nowValue: number
   return result;
 }
 
-export const getConfig = async () => {
-  const res = await dashboard.getConfig();
-  const dataCondition = res.dataConditions[0]
-  const customConfig = res.customConfig as unknown as ICustomConfig;
-  return { dataCondition, customConfig };
-}
-
 
 /**
  * 把自定义配置转换成SDK接口参数
 */
-export const configFormatter = (customConfig: ICustomConfig) => {
-  const formatterList = [
-    {
-      dateRange: customConfig.dateRange
-    },
-    ...customConfig.momOrYoy
-  ]
-  const dataRangeList: IDataRange[] = formatterList.map((item, index) => {
-    let startTime: number, endTime: number;
-    if (index === 0) {
-      const timeObj = getDateRangeTimestamp(customConfig.dateRange);
-      startTime = timeObj.startTime;
-      endTime = timeObj.endTime;
-    } else {
-      const newItem = { ...item } as MomOrYoy
-      const timeObj = getMomYoyDateRange(customConfig.dateRange, newItem.momOrYoyCalcMethod)
-      startTime = timeObj.startTime;
-      endTime = timeObj.endTime;
-    }
-    // 由于日期过滤不支持大于等于和小于等于 开始和结束时间需要错开1毫秒
-    // startTime = startTime - 1;
-    // endTime = endTime + 1;
+// export const configFormatter = (customConfig: ICustomConfig) => {
+//   const formatterList = [
+//     {
+//       dateRange: customConfig.dateRange
+//     },
+//     ...customConfig.momOrYoy
+//   ]
+//   const dataRangeList: IDataRange[] = formatterList.map((item, index) => {
+//     let startTime: number, endTime: number;
+//     if (index === 0) {
+//       const timeObj = getDateRangeTimestamp(customConfig.dateRange);
+//       startTime = timeObj.startTime;
+//       endTime = timeObj.endTime;
+//     } else {
+//       const newItem = { ...item } as MomOrYoy
+//       const timeObj = getMomYoyDateRange(customConfig.dateRange, newItem.momOrYoyCalcMethod)
+//       startTime = timeObj.startTime;
+//       endTime = timeObj.endTime;
+//     }
+//     // 由于日期过滤不支持大于等于和小于等于 开始和结束时间需要错开1毫秒
+//     // startTime = startTime - 1;
+//     // endTime = endTime + 1;
+//
+//     // 由于接口参数会把传过去的时间格式化成0点0分0秒，需要把结束时间推到后一天的00:00:00
+//     endTime = dayjs(endTime).add(1, 'day').startOf('day').valueOf();
+//     const dataRangeItem: IDataRange = {
+//       type: SourceType.ALL,
+//       filterInfo: {
+//         conjunction: FilterConjunction.And,
+//         conditions: [{
+//           fieldId: customConfig.dateTypeFieldId,
+//           value: startTime,
+//           fieldType: customConfig.dateTypeFieldType,
+//           operator: FilterOperator.IsGreater,
+//         },
+//         {
+//           fieldId: customConfig.dateTypeFieldId,
+//           value: endTime,
+//           fieldType: customConfig.dateTypeFieldType,
+//           operator: FilterOperator.IsLess,
+//         }]
+//       }
+//     };
+//     return dataRangeItem;
+//   });
+//   const seriesArr = [{
+//     fieldId: customConfig.numberOrCurrencyFieldId,
+//     rollup: customConfig.statisticalCalcType
+//   }];
+//   const dataConditionList: IDataCondition[] = dataRangeList.map(item => {
+//     const dataConditionItem: IDataCondition = {
+//       tableId: customConfig.tableId,
+//       dataRange: item,
+//       series: customConfig.statisticalType === 'number' ? seriesArr : 'COUNTA',
+//     };
+//     return dataConditionItem;
+//   })
+//   return dataConditionList;
+// }
 
-    // 由于接口参数会把传过去的时间格式化成0点0分0秒，需要把结束时间推到后一天的00:00:00
-    endTime = dayjs(endTime).add(1, 'day').startOf('day').valueOf();
-    const dataRangeItem: IDataRange = {
-      type: SourceType.ALL,
-      filterInfo: {
-        conjunction: FilterConjunction.And,
-        conditions: [{
-          fieldId: customConfig.dateTypeFieldId,
-          value: startTime,
-          fieldType: customConfig.dateTypeFieldType,
-          operator: FilterOperator.IsGreater,
-        },
-        {
-          fieldId: customConfig.dateTypeFieldId,
-          value: endTime,
-          fieldType: customConfig.dateTypeFieldType,
-          operator: FilterOperator.IsLess,
-        }]
-      }
-    };
-    return dataRangeItem;
-  });
-  const seriesArr = [{
-    fieldId: customConfig.numberOrCurrencyFieldId,
-    rollup: customConfig.statisticalCalcType
-  }];
-  const dataConditionList: IDataCondition[] = dataRangeList.map(item => {
-    const dataConditionItem: IDataCondition = {
-      tableId: customConfig.tableId,
-      dataRange: item,
-      series: customConfig.statisticalType === 'number' ? seriesArr : 'COUNTA',
-    };
-    return dataConditionItem;
-  })
-  return dataConditionList;
+export const configFormatter = (customConfig: ICustomConfig) => {
+  console.log('configFormatter---------', customConfig);
+  let list: IDataCondition[] = []
+  return list
 }
 
+export const getConfig = async () => {
+  const res = await dashboard.getConfig();
+  console.log('get config----',res)
+  const dataConditions: IDataCondition[] = res.dataConditions
+  const customConfig = res.customConfig as ICustomConfig;
+  // if (dataConditions.length > 0) {
+  //   const firstCondition = dataConditions[0];
+  //   if (firstCondition.tableId) {
+  //     customConfig.tableId = firstCondition.tableId
+  //   }
+  // }
+  return customConfig;
+}
 /**
  * 把SDK接口参数转换成自定义配置
 */
-export const dataConditionFormatter = (dataCondition: IDataCondition, customConfig: ICustomConfig) => {
+export const dataConditionFormatter = (dataConditions: IDataCondition[], customConfig: ICustomConfig) => {
   const newCustomConfig = { ...customConfig }
-  newCustomConfig.tableId = dataCondition.tableId;
-  if (newCustomConfig.statisticalType === 'number') {
-    const series = dataCondition.series as ISeries[];
-    newCustomConfig.numberOrCurrencyFieldId = series[0].fieldId;
-    newCustomConfig.statisticalCalcType = series[0].rollup;
+  if (dataConditions.length > 0) {
+    const firstCondition = dataConditions[0];
+    newCustomConfig.tableId = firstCondition.tableId;
   }
   return newCustomConfig;
 }
@@ -395,32 +415,36 @@ export const dataConditionFormatter = (dataCondition: IDataCondition, customConf
  * 现阶段接口只支持单个查询条件，需要手动拼接成多次调用接口模拟批量查询
 */
 export const getPreviewData = async (customConfig: ICustomConfig) => {
-  const dataConditionList = configFormatter(customConfig);
+  console.log('getPreviewData---------', customConfig)
+  const dataConditionList: IDataCondition[] = configFormatter(customConfig);
   const result: number[] = [];
   for (const item of dataConditionList) {
     const data = await dashboard.getPreviewData(item);
+    console.log('getPreviewData for-------------', item, data)
     const resultItem = data[1]?.map(item => item.value as number);
     result.push(resultItem?.length ? resultItem[0] : 0);
   }
   return result;
 }
 
-export const getData = async (customConfig: ICustomConfig) => {
-  const dataConditionList = configFormatter(customConfig);
-  const result: number[] = [];
-  for (const item of dataConditionList) {
-    const myConfig = {
-      dataConditions: item,
-      customConfig: customConfig
-    } as any
-    await dashboard.saveConfig(myConfig)
-    await delay(2000)
-    const data = await dashboard.getData();
-    const resultItem = data[1]?.map(item => item.value as number)
-    result.push(resultItem?.length ? resultItem[0] : 0);
-  }
-  return result;
-}
+// export const getData = async (customConfig: ICustomConfig) => {
+//   const dataConditionList: IDataCondition[] = configFormatter(customConfig);
+//   const result: number[] = [];
+//   for (const item of dataConditionList) {
+//     const myConfig = {
+//       dataConditions: item,
+//       customConfig: customConfig
+//     } as any
+//     console.log('getData to save config-------', myConfig);
+//     await dashboard.saveConfig(myConfig)
+//     await delay(2000)
+//     const data = await dashboard.getData();
+//     console.log('get Data++++++++++++++++++++++++', data)
+//     const resultItem = data[1]?.map(item => item.value as number)
+//     result.push(resultItem?.length ? resultItem[0] : 0);
+//   }
+//   return result;
+// }
 
 /**
  * 根据环同比的指标获取对应的指标描述
