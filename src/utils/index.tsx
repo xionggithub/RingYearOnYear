@@ -8,7 +8,7 @@ import {
   ISeries,
   SourceType,
   dashboard,
-  DashboardState
+  DashboardState, IGroupItem, ViewDataRange
 } from "@lark-base-open/js-sdk";
 import { DateRangeType, ICustomConfig, IMomYoyList, IRenderData, IconColor, IconStyleId, MomOrYoy, MomOrYoyCalcMethod, MomOrYoyCalcType, MyFilterDurationEnum, NumberFormat } from '@/common/type'
 import dayjs from 'dayjs';
@@ -378,9 +378,29 @@ export const getMomYoyCalcResult = (calcType: MomOrYoyCalcType, nowValue: number
 //   return dataConditionList;
 // }
 
-export const configFormatter = (customConfig: ICustomConfig) => {
+export const configFormatter = async (customConfig: ICustomConfig) => {
   console.log('configFormatter---------', customConfig);
   let list: IDataCondition[] = []
+  if (customConfig.tableId) {
+    const dataRanges: IDataRange[] = await dashboard.getTableDataRange(customConfig.tableId);
+    if (customConfig.keyIndicatorsFieldId) {
+      const range = customConfig.datasourceRange === 'All' ? dataRanges.find(item => item.type === SourceType.ALL) : dataRanges.find(item => item['viewId'] === customConfig.datasourceRange)
+      const keyCondition: IDataCondition = {
+        tableId: customConfig.tableId,
+        dataRange: range,
+        series: [{ fieldId: customConfig.keyIndicatorsFieldId, rollup: customConfig.keyIndicatorsRollup }]
+      } as IDataCondition
+      list.push(keyCondition)
+      customConfig.momOrYoy.forEach(item => {
+        const auxiliaryCondition: IDataCondition = {
+          tableId: customConfig.tableId,
+          dataRange: range,
+          series: [{ fieldId: item.momOrYoyFieldId, rollup: item.indicatorsRollup }]
+        } as IDataCondition
+        list.push(auxiliaryCondition)
+      })
+    }
+  }
   return list
 }
 
@@ -389,12 +409,12 @@ export const getConfig = async () => {
   console.log('get config----',res)
   const dataConditions: IDataCondition[] = res.dataConditions
   const customConfig = res.customConfig as ICustomConfig;
-  // if (dataConditions.length > 0) {
-  //   const firstCondition = dataConditions[0];
-  //   if (firstCondition.tableId) {
-  //     customConfig.tableId = firstCondition.tableId
-  //   }
-  // }
+  if (dataConditions.length > 0) {
+    const firstCondition = dataConditions[0];
+    if (firstCondition.tableId && !customConfig.tableId.length) {
+      customConfig.tableId = firstCondition.tableId
+    }
+  }
   return customConfig;
 }
 /**
@@ -416,9 +436,10 @@ export const dataConditionFormatter = (dataConditions: IDataCondition[], customC
 */
 export const getPreviewData = async (customConfig: ICustomConfig) => {
   console.log('getPreviewData---------', customConfig)
-  const dataConditionList: IDataCondition[] = configFormatter(customConfig);
+  const dataConditionList: IDataCondition[] = await configFormatter(customConfig);
   const result: number[] = [];
   for (const item of dataConditionList) {
+    console.log(item,'------init item')
     const data = await dashboard.getPreviewData(item);
     console.log('getPreviewData for-------------', item, data)
     const resultItem = data[1]?.map(item => item.value as number);

@@ -48,7 +48,6 @@ export default function App() {
 
     // 展示态
     useEffect(() => {
-        console.log('state--state--state---state-',dashboard.state)
         if (DashboardState.Create !== dashboard.state) {
             renderMain().then(() => {
                 setIsLoading(false)
@@ -57,6 +56,13 @@ export default function App() {
             setIsLoading(false)
         }
         dashboard.onDataChange((data) => {
+            console.log('------------------change------------------------')
+            if (DashboardState.Create !== dashboard.state) {
+                renderMain().then();
+            }
+        });
+        dashboard.onConfigChange((data) => {
+            console.log('----------onConfigChange--------change------------------------')
             if (DashboardState.Create !== dashboard.state) {
                 renderMain().then();
             }

@@ -39,20 +39,18 @@ export default function MainConfigPanel({ setRenderData, initializeConfig }: IPr
   useConfig(setConfig).then();
 
   /**保存配置 */
-  const onSaveConfig = () => {
+  const onSaveConfig = async () => {
     console.log('save config', JSON.stringify(config), JSON.parse(JSON.stringify(config)))
     if (!config.keyIndicatorsFieldId) {
       Toast.error(t('dataPlaceholder'));
       return;
     }
     // 目前只持存保存一份查询配置
-    const dataConditions: IDataCondition[] = configFormatter(config)
-    dashboard.saveConfig({
+    const dataConditions: IDataCondition[] = await configFormatter(config)
+    await dashboard.saveConfig({
       customConfig: config,
       dataConditions: dataConditions,//myDataCondition,
-    } as any).then((res) => {
-      console.log('save config res', res)
-    });
+    } as any);
   }
 
 
