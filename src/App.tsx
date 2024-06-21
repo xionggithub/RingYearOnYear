@@ -21,6 +21,7 @@ export default function App() {
     /** 是否配置/创建模式下 */
     const isConfig = dashboard.state === DashboardState.Config || dashboard.state === DashboardState.Create;
     const [isLoading, setIsLoading] = useState(true)
+    const [theme, setTheme] = useState('light')
     const [config, setConfig] = useState<ICustomConfig>(defaultConfig);
 
     const [renderData, setRenderData] = useState<IRenderData>({
@@ -48,6 +49,9 @@ export default function App() {
 
     // 展示态
     useEffect(() => {
+        bitable.bridge.getTheme().then((theme: string) => {
+            setTheme(theme)
+        })
         if (DashboardState.Create !== dashboard.state) {
             renderMain().then(() => {
                 setIsLoading(false)
@@ -56,13 +60,11 @@ export default function App() {
             setIsLoading(false)
         }
         dashboard.onDataChange((data) => {
-            console.log('------------------change------------------------')
             if (DashboardState.Create !== dashboard.state) {
                 renderMain().then();
             }
         });
         dashboard.onConfigChange((data) => {
-            console.log('----------onConfigChange--------change------------------------')
             if (DashboardState.Create !== dashboard.state) {
                 renderMain().then();
             }
@@ -73,7 +75,7 @@ export default function App() {
         (<div style={{ width: '100%', height: '100%', display: 'grid', alignItems: 'center', justifyItems: 'center' }}>
             <div style={{ width: 'max-content', height: 'max-content', display: 'flex', flexDirection: 'column', alignItems: 'center', rowGap: '10px', justifyItems: 'center' }}>
                 <Icon svg={<IconLoading />} />
-                <div style={{textAlign: 'center', fontSize: '16px'}}>加载中...</div>
+                <div style={{textAlign: 'center', fontSize: '16px',  color: theme === 'light' ?  "#1F2329" :  "#FFFFFF" }}>加载中...</div>
             </div>
         </div>) :
         (<main className={classnames(isConfig ? 'top-border' : '', 'main')} ref={mainDomRef}>
