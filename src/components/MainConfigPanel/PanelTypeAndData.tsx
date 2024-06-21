@@ -108,10 +108,16 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
     setConfig({ ...config });
   }
 
-  const changeComputeMethod = (value) => {
-    config.keyIndicatorsRollup = value
-    setConfig(config)
-    setKeyIndicatorsFieldIdRollup(value)
+  // const changeComputeMethod = (value) => {
+  //   config.keyIndicatorsRollup = value
+  //   setConfig(config)
+  //   setKeyIndicatorsFieldIdRollup(value)
+  // }
+
+  const chooseTag = (key: string) => {
+    const findItem = methodList.find(dropItem => dropItem.type === key )
+    const keyOfName: string = findItem?.keyOfName ?? ''
+    return  t(keyOfName)
   }
 
   return (
@@ -123,7 +129,6 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
             field='dataSource'
             prefix={<Icon svg={<IconTable />} />}
             optionList={tableList as Mutable<typeof tableList>}
-            value={tableId}
             initValue={tableId}
             onChange={tableChange}>
         </Form.Select>
@@ -147,9 +152,10 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
                 };
               }
             })}
-            value={dataRangeId}
             initValue={dataRangeId}
-            onChange={datasourceRangeChange}>
+            onChange={ (value) => {
+              datasourceRangeChange(value as string)
+            }}>
         </Form.Select>
       </div>
       <Divider style={{ borderColor: 'var(--divider)', margin: '20px 0 20px 0' }} />
@@ -175,7 +181,7 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
                     { methodList.map(item => {
                       return (<Dropdown.Item key={item.type}
                           onClick={(event) => {
-                            const data = event.target.textContent;
+                            const data = (event.target as any).textContent;
                             const findItem = methodList.find(tempItem => t(tempItem.keyOfName) === data);
                             if (findItem) {
                               console.log(findItem.type)
@@ -194,10 +200,9 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
                 e.stopPropagation();
               }}
               >{
-                t(methodList.find(item => item.type === keyIndicatorsFieldIdRollup)?.keyOfName)
+                chooseTag(keyIndicatorsFieldIdRollup)
               }</Tag>
             </Dropdown>}
-            value={keyIndicatorsFieldId}
             initValue={keyIndicatorsFieldId}
             onChange={(value) => { handlerChange('keyIndicatorsFieldId', value) }}
             optionList={currentFields.map(item => {
@@ -237,7 +242,6 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
               field={'momOrYoyFieldId' + index}
               placeholder={t('auxiliary_index')}
               position='top'
-              value={item.momOrYoyFieldId}
               initValue={item.momOrYoyFieldId}
               onChange={(value) =>  momOrYoyItemChange(item, 'momOrYoyFieldId', value, index)}
               optionList={currentFields.map(item => {
@@ -260,7 +264,7 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
                         { methodList.map(dropItem => {
                           return (<Dropdown.Item key={dropItem.type}
                                                  onClick={(event) => {
-                                                   const data = event.target.textContent;
+                                                   const data = (event.target as any).textContent;
                                                    const findItem = methodList.find(tempItem => t(tempItem.keyOfName) === data);
                                                    if (findItem) {
                                                      console.log(findItem.type)
@@ -277,9 +281,7 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
                   <Tag className="drop-down-tag" onClick={(e) => {
                     e.stopPropagation();
                   }}
-                  >{
-                    t(methodList.find(dropItem => dropItem.type === item.indicatorsRollup )?.keyOfName)
-                  }</Tag>
+                  >{chooseTag(item.indicatorsRollup)}</Tag>
                 </Dropdown>}
             >
             </Form.Select>
@@ -295,7 +297,6 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
               field={'momOrYoyCalcType' + index}
               position='top'
               optionList={momOrYoyCalcTypeList as Mutable<typeof momOrYoyCalcTypeList>}
-              value={item.momOrYoyCalcType}
               initValue={item.momOrYoyCalcType}
               onChange={(value) => momOrYoyItemChange(item, 'momOrYoyCalcType', value, index)}>
             </Form.Select>

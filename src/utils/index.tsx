@@ -384,7 +384,7 @@ export const configFormatter = async (customConfig: ICustomConfig) => {
   if (customConfig.tableId) {
     const dataRanges: IDataRange[] = await dashboard.getTableDataRange(customConfig.tableId);
     if (customConfig.keyIndicatorsFieldId) {
-      const range = customConfig.datasourceRange === 'All' ? dataRanges.find(item => item.type === SourceType.ALL) : dataRanges.find(item => item['viewId'] === customConfig.datasourceRange)
+      const range = customConfig.datasourceRange === 'All' ? dataRanges.find(item => item.type === SourceType.ALL) : dataRanges.find(item => (item as any)['viewId'] === customConfig.datasourceRange)
       const keyCondition: IDataCondition = {
         tableId: customConfig.tableId,
         dataRange: range,
@@ -408,7 +408,7 @@ export const getConfig = async () => {
   const res = await dashboard.getConfig();
   console.log('get config----',res)
   const dataConditions: IDataCondition[] = res.dataConditions
-  const customConfig = res.customConfig as ICustomConfig;
+  const customConfig = res.customConfig as any;
   if (dataConditions.length > 0) {
     const firstCondition = dataConditions[0];
     if (firstCondition.tableId && !customConfig.tableId.length) {
