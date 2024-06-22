@@ -147,7 +147,6 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
       <div className='form-item' key="dataRange">
         <Select
             prefix={<Icon svg={<IconTable />} />}
-            field='dataRange'
             optionList={dataRange.map(item => {
               if (item.type === SourceType.ALL) {
                 return {
@@ -161,7 +160,6 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
                 };
               }
             })}
-            initValue={dataRangeId}
             defaultValue={dataRangeId}
             value={dataRangeId}
             onChange={ (value) => {
@@ -175,7 +173,6 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
       <div className='form-item'>
         <Select
             className='drop-down-select'
-            field='keyIndicators'
             placeholder={t('key_indicators')}
             prefix={<Icon svg={<IconNumber />} />}
             showArrow={false}
@@ -213,7 +210,6 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
                 chooseTag(keyIndicatorsFieldIdRollup)
               }</Tag>
             </Dropdown>}
-            initValue={keyIndicatorsFieldId}
             defaultValue={keyIndicatorsFieldId}
             value={keyIndicatorsFieldId}
             onChange={(value) => { handlerChange('keyIndicatorsFieldId', value) }}
@@ -251,10 +247,8 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
             {/*momOrYoyCalcMethod*/}
             <Select
               prefix={<Icon svg={<IconNumber />} />}
-              field={'momOrYoyFieldId' + index}
               placeholder={t('auxiliary_index')}
               position='top'
-              initValue={item.momOrYoyFieldId}
               defaultValue={item.momOrYoyFieldId}
               value={item.momOrYoyFieldId}
               onChange={(value) =>  momOrYoyItemChange(item, 'momOrYoyFieldId', value, index)}
@@ -308,10 +302,8 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
 
             <div className='form-subTitle'>{t('calculationType')}</div>
             <Select
-              field={'momOrYoyCalcType' + index}
               position='top'
               optionList={momOrYoyCalcTypeList as Mutable<typeof momOrYoyCalcTypeList>}
-              initValue={item.momOrYoyCalcType}
               defaultValue={item.momOrYoyCalcType}
               value={item.momOrYoyCalcType}
               onChange={(value) => momOrYoyItemChange(item, 'momOrYoyCalcType', value, index)}>
