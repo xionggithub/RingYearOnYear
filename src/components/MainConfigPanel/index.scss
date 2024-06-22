@@ -170,3 +170,20 @@
 .drop-down-select :hover {
     background-color: transparent;
 }
+
+
+.semi-icon svg path {
+  fill: var(--svg-path-fill);
+}
+
+.semi-icon-default svg path {
+  fill: var(--svg-path-fill);
+}
+
+.semi-select-option-disabled .semi-icon svg path {
+  fill: var(--svg-path-fill-disable);
+}
+
+.semi-select-option-disabled .semi-icon svg path {
+  fill: var(--svg-path-fill-disable);
+}
