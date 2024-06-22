@@ -27,6 +27,7 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
   const [keyIndicatorsFieldIdRollup, setKeyIndicatorsFieldIdRollup] = useState(config.keyIndicatorsRollup ?? Rollup.SUM);
   const [dataRange, setDataRange] = useState<IDataRange[]>(datasourceRange)
   const [dataRangeId, setDataRangeId] = useState<string>(config.datasourceRange)
+
   const methodList: { keyOfName: string, type: Rollup }[] = [
     { keyOfName: 'sum', type: Rollup.SUM },
     { keyOfName: 'average', type: Rollup.AVERAGE },
@@ -36,15 +37,22 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
 
   useEffect(() => {
     setTableId(config.tableId)
+    console.log('use effect :11::::', config.tableId, config.datasourceRange, '---', tableId, dataRangeId)
+  }, [config.tableId])
+
+  useEffect(() => {
     setDataRangeId(config.datasourceRange)
-  }, [config])
+    console.log('use effect ::22:::', config.tableId, config.datasourceRange, '---', tableId, dataRangeId)
+  }, [config.datasourceRange])
 
   useEffect(() => {
     setCurrentFields(tableFields)
+    console.log('use effect ::33:::', config.tableId, config.datasourceRange, tableFields, '---', tableId, dataRangeId)
   }, [tableFields])
 
   useEffect(() => {
     setDataRange(datasourceRange)
+    console.log('use effect ::44:::', config.tableId, config.datasourceRange, datasourceRange)
   }, [datasourceRange])
 
   const tableChange = async (tableId: any) => {
@@ -78,9 +86,9 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
     if (key === 'momOrYoyDesc') {
       item.manualSetDesc = true;
     }
-    const { manualSetDesc, momOrYoyCalcMethod, momOrYoyCalcType } = item;
-    if (!manualSetDesc) {
-      item.momOrYoyDesc = getMomYoyDesc(momOrYoyCalcMethod, momOrYoyCalcType);
+    const manualSetDesc: any = momOrYoyCalcTypeList.find(optionItem =>optionItem.value === item.momOrYoyCalcType)
+    if (manualSetDesc) {
+      item.momOrYoyDesc = manualSetDesc.label;
     }
     config.momOrYoy[index] = item;
     setConfig({ ...config });
@@ -120,6 +128,19 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
     return  t(keyOfName)
   }
 
+  const selectedFieldIds = () => {
+    const ids: string[] = [];
+    if (config.keyIndicatorsFieldId) {
+      ids.push(config.keyIndicatorsFieldId)
+    }
+    config.momOrYoy.forEach(item => {
+      if (item.momOrYoyFieldId) {
+        ids.push(item.momOrYoyFieldId)
+      }
+    })
+    return ids;
+  }
+
   return (
     <Form className="form-main">
       <div className="form-title">{t('dataSource')}</div>
@@ -128,7 +149,12 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
             noLabel={true}
             field='dataSource'
             prefix={<Icon svg={<IconTable />} />}
-            optionList={tableList as Mutable<typeof tableList>}
+            optionList={tableList.map(item => {
+              return {
+                value: item.value,
+                label: item.label
+              }
+            })}
             initValue={tableId}
             onChange={tableChange}>
         </Form.Select>
@@ -206,10 +232,11 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
             initValue={keyIndicatorsFieldId}
             onChange={(value) => { handlerChange('keyIndicatorsFieldId', value) }}
             optionList={currentFields.map(item => {
+              const ids = selectedFieldIds()
               return {
                 value: item.id,
                 label: item.name,
-                disabled: item.type !== 2
+                disabled: item.type !== 2 || ids.some(id => id === item.id)
               };
           })}
         />
@@ -245,10 +272,11 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
               initValue={item.momOrYoyFieldId}
               onChange={(value) =>  momOrYoyItemChange(item, 'momOrYoyFieldId', value, index)}
               optionList={currentFields.map(item => {
+                const ids = selectedFieldIds()
                 return {
                   value: item.id,
                   label: item.name,
-                  disabled: item.type !== 2
+                  disabled: item.type !== 2 || ids.some(id => id === item.id)
                 };
               })}
               showArrow={false}

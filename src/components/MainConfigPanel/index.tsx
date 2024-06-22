@@ -81,6 +81,10 @@ export default function MainConfigPanel({ setRenderData, initializeConfig }: IPr
     }
     const datasourceRange = await dashboard.getTableDataRange(customConfig.tableId)
     setDatasourceRange(datasourceRange)
+    if (!customConfig.datasourceRange) {
+      customConfig.datasourceRange = 'All'
+    }
+    console.log(config.datasourceRange, '--------------------')
     const table = await base.getTable(customConfig.tableId);
     const fields = (await table.getFieldMetaList()) as any[]
     setTableFields(fields)

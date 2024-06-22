@@ -482,7 +482,7 @@ export const getMomYoyDesc = (calcMethod: MomOrYoyCalcMethod, calcType: MomOrYoy
     differenceValue: t('growthValue'),
     originalValue: t('originalValue'),
   };
-  return `${methodStringObj[calcMethod]}${typeStringObj[calcType]}`
+  return `${typeStringObj[calcType]}`
 }
 
 /**

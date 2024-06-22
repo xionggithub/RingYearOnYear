@@ -232,7 +232,7 @@ export const defaultConfig: ICustomConfig = {
   datasourceRange: '',
   momOrYoy: [
     {
-      momOrYoyDesc: t('momGrowthRate'),
+      momOrYoyDesc: t('differenceRate'),
       manualSetDesc: false,
       momOrYoyCalcMethod: 'mom',
       momOrYoyCalcType: 'differenceRate',
