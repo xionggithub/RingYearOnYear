@@ -71,7 +71,7 @@
   "suffix": "Suffix",
   "prefixPlaceholder": "Please enter a prefix",
   "suffixPlaceholder": "Please enter a suffix",
-  "dataPlaceholder": "Please select a date field",
+  "dataPlaceholder": "Please select a data field",
   "formatErrorMessage": "Only positive integers are allowed",
   "allData": "All Data",
   "confirm": "Confirm"

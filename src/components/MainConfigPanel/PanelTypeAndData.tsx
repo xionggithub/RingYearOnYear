@@ -37,22 +37,18 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
 
   useEffect(() => {
     setTableId(config.tableId)
-    console.log('use effect :11::::', config.tableId, config.datasourceRange, '---', tableId, dataRangeId)
   }, [config.tableId])
 
   useEffect(() => {
     setDataRangeId(config.datasourceRange)
-    console.log('use effect ::22:::', config.tableId, config.datasourceRange, '---', tableId, dataRangeId)
   }, [config.datasourceRange])
 
   useEffect(() => {
     setCurrentFields(tableFields)
-    console.log('use effect ::33:::', config.tableId, config.datasourceRange, tableFields, '---', tableId, dataRangeId)
   }, [tableFields])
 
   useEffect(() => {
     setDataRange(datasourceRange)
-    console.log('use effect ::44:::', config.tableId, config.datasourceRange, datasourceRange)
   }, [datasourceRange])
 
   const tableChange = async (tableId: any) => {
@@ -116,12 +112,6 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
     setConfig({ ...config });
   }
 
-  // const changeComputeMethod = (value) => {
-  //   config.keyIndicatorsRollup = value
-  //   setConfig(config)
-  //   setKeyIndicatorsFieldIdRollup(value)
-  // }
-
   const chooseTag = (key: string) => {
     const findItem = methodList.find(dropItem => dropItem.type === key )
     const keyOfName: string = findItem?.keyOfName ?? ''
@@ -142,10 +132,10 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
   }
 
   return (
-    <Form className="form-main">
+    <div className="form-main">
       <div className="form-title">{t('dataSource')}</div>
-      <div className='form-item'>
-        <Form.Select
+      <div className='form-item' key='dataSource'>
+        <Select
             noLabel={true}
             field='dataSource'
             prefix={<Icon svg={<IconTable />} />}
@@ -156,12 +146,13 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
               }
             })}
             initValue={tableId}
+            defaultValue={tableId}
             onChange={tableChange}>
-        </Form.Select>
+        </Select>
       </div>
       <div className="form-title">{t('dataRange')}</div>
-      <div className='form-item'>
-        <Form.Select
+      <div className='form-item' key="dataRange">
+        <Select
             prefix={<Icon svg={<IconTable />} />}
             noLabel={true}
             field='dataRange'
@@ -179,16 +170,17 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
               }
             })}
             initValue={dataRangeId}
+            defaultValue={dataRangeId}
             onChange={ (value) => {
               datasourceRangeChange(value as string)
             }}>
-        </Form.Select>
+        </Select>
       </div>
       <Divider style={{ borderColor: 'var(--divider)', margin: '20px 0 20px 0' }} />
 
       <div className="form-title">{t('key_indicators')}</div>
       <div className='form-item'>
-        <Form.Select
+        <Select
             noLabel={true}
             className='drop-down-select'
             field='keyIndicators'
@@ -230,6 +222,7 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
               }</Tag>
             </Dropdown>}
             initValue={keyIndicatorsFieldId}
+            defaultValue={keyIndicatorsFieldId}
             onChange={(value) => { handlerChange('keyIndicatorsFieldId', value) }}
             optionList={currentFields.map(item => {
               const ids = selectedFieldIds()
@@ -263,13 +256,14 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
             )}
             <div className='form-subTitle'>{t('field')}</div>
             {/*momOrYoyCalcMethod*/}
-            <Form.Select
+            <Select
               noLabel={true}
               prefix={<Icon svg={<IconNumber />} />}
               field={'momOrYoyFieldId' + index}
               placeholder={t('auxiliary_index')}
               position='top'
               initValue={item.momOrYoyFieldId}
+              defaultValue={item.momOrYoyFieldId}
               onChange={(value) =>  momOrYoyItemChange(item, 'momOrYoyFieldId', value, index)}
               optionList={currentFields.map(item => {
                 const ids = selectedFieldIds()
@@ -312,7 +306,7 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
                   >{chooseTag(item.indicatorsRollup)}</Tag>
                 </Dropdown>}
             >
-            </Form.Select>
+            </Select>
 
             <div className='form-subTitle'>{t('description')}</div>
             <Input
@@ -320,18 +314,19 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
                 onChange={(value) =>  momOrYoyItemChange(item, 'momOrYoyDesc', value, index)} />
 
             <div className='form-subTitle'>{t('calculationType')}</div>
-            <Form.Select
+            <Select
               noLabel={true}
               field={'momOrYoyCalcType' + index}
               position='top'
               optionList={momOrYoyCalcTypeList as Mutable<typeof momOrYoyCalcTypeList>}
               initValue={item.momOrYoyCalcType}
+              defaultValue={item.momOrYoyCalcType}
               onChange={(value) => momOrYoyItemChange(item, 'momOrYoyCalcType', value, index)}>
-            </Form.Select>
+            </Select>
             <div ref={scrollToBottomRef}></div>
           </div>
         ))
       }
-    </Form>
+    </div>
   )
 }

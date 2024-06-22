@@ -76,7 +76,7 @@
   "suffix": "后缀",
   "prefixPlaceholder": "请输入前缀",
   "suffixPlaceholder": "请输入后缀",
-  "dataPlaceholder": "请选择日期字段",
+  "dataPlaceholder": "请选择指标字段",
   "formatErrorMessage": "仅允许输入大于零的整数",
   "allData": "全部数据",
   "confirm": "确定"
