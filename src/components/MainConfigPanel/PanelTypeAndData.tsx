@@ -147,7 +147,6 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
       <div className='form-item' key="dataRange">
         <Select
             prefix={<Icon svg={<IconTable />} />}
-            noLabel={true}
             field='dataRange'
             optionList={dataRange.map(item => {
               if (item.type === SourceType.ALL) {
@@ -175,7 +174,6 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
       <div className="form-title">{t('key_indicators')}</div>
       <div className='form-item'>
         <Select
-            noLabel={true}
             className='drop-down-select'
             field='keyIndicators'
             placeholder={t('key_indicators')}
@@ -252,7 +250,6 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
             <div className='form-subTitle'>{t('field')}</div>
             {/*momOrYoyCalcMethod*/}
             <Select
-              noLabel={true}
               prefix={<Icon svg={<IconNumber />} />}
               field={'momOrYoyFieldId' + index}
               placeholder={t('auxiliary_index')}
@@ -311,7 +308,6 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
 
             <div className='form-subTitle'>{t('calculationType')}</div>
             <Select
-              noLabel={true}
               field={'momOrYoyCalcType' + index}
               position='top'
               optionList={momOrYoyCalcTypeList as Mutable<typeof momOrYoyCalcTypeList>}
