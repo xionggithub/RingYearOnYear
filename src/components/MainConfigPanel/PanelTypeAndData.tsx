@@ -56,9 +56,9 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
     setTableId(tableId)
     const datasourceRange = await dashboard.getTableDataRange(tableId);
     setDataRange(datasourceRange)
-    setDataRangeId('All')
     config.datasourceRange = ''
     setConfig({...config })
+    setDataRangeId('All')
     const table = await base.getTable(tableId);
     const tableFields = (await table.getFieldMetaList()) as any[]
     setCurrentFields(tableFields)
@@ -136,17 +136,10 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
       <div className="form-title">{t('dataSource')}</div>
       <div className='form-item' key='dataSource'>
         <Select
-            noLabel={true}
-            field='dataSource'
+            style={{width : '100%'}}
             prefix={<Icon svg={<IconTable />} />}
-            optionList={tableList.map(item => {
-              return {
-                value: item.value,
-                label: item.label
-              }
-            })}
-            initValue={tableId}
-            defaultValue={tableId}
+            optionList={tableList}
+            value={tableId}
             onChange={tableChange}>
         </Select>
       </div>
@@ -171,6 +164,7 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
             })}
             initValue={dataRangeId}
             defaultValue={dataRangeId}
+            value={dataRangeId}
             onChange={ (value) => {
               datasourceRangeChange(value as string)
             }}>
@@ -223,6 +217,7 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
             </Dropdown>}
             initValue={keyIndicatorsFieldId}
             defaultValue={keyIndicatorsFieldId}
+            value={keyIndicatorsFieldId}
             onChange={(value) => { handlerChange('keyIndicatorsFieldId', value) }}
             optionList={currentFields.map(item => {
               const ids = selectedFieldIds()
@@ -264,6 +259,7 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
               position='top'
               initValue={item.momOrYoyFieldId}
               defaultValue={item.momOrYoyFieldId}
+              value={item.momOrYoyFieldId}
               onChange={(value) =>  momOrYoyItemChange(item, 'momOrYoyFieldId', value, index)}
               optionList={currentFields.map(item => {
                 const ids = selectedFieldIds()
@@ -321,6 +317,7 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
               optionList={momOrYoyCalcTypeList as Mutable<typeof momOrYoyCalcTypeList>}
               initValue={item.momOrYoyCalcType}
               defaultValue={item.momOrYoyCalcType}
+              value={item.momOrYoyCalcType}
               onChange={(value) => momOrYoyItemChange(item, 'momOrYoyCalcType', value, index)}>
             </Select>
             <div ref={scrollToBottomRef}></div>
