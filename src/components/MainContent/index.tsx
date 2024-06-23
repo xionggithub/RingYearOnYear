@@ -20,19 +20,21 @@ export default function MainContent({ renderData, mainDomRef }: IProps) {
   // 设置文字大小
   const setFontSizeDebounce = debounce(() => {
     const text = `${renderData.prefix}${renderData.value}${renderData.suffix}`;
+    const  padding = 80;
     let fontSize = 26;
     if (isConfig) {
       // 创建状态和配置状态时，使用主数据容器宽度计算文字大小
       const defaultFontSize = 26;
       const mainContentWidth = mainContentRef.current?.offsetWidth || 0;
-      fontSize = getDomTextFontSize(mainContentWidth, text, defaultFontSize);
+      fontSize = getDomTextFontSize(mainContentWidth - padding, text, defaultFontSize);
     } else {
       // 否则使用最外层容器宽度计算文字大小
       const defaultFontSize = 26;
       const mainDomWidth = mainDomRef.current?.offsetWidth || 0;
-      fontSize = getDomTextFontSize(mainDomWidth, text, defaultFontSize);
+      fontSize = getDomTextFontSize(mainDomWidth - padding, text, defaultFontSize);
     }
     numberContentRef.current && (numberContentRef.current.style.fontSize = `${fontSize}vmax`);
+    // numberContentRef.current && (numberContentRef.current.style.fontSize = `calc(${fontSize} * (0.5vw + 0.5vh))`)
   }, 200);
 
   const resizeHandler = () => {
