@@ -162,14 +162,7 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
   const renderTableSelectedItem = optionNode => (
       <div style={{ display: 'flex', alignItems: 'center' }} className="custom-option-render">
         <Icon svg={<IconTable />} />
-        <span style={{ marginLeft: 8 }}>{optionNode.label}</span>
-      </div>
-  );
-
-  const renderFieldSelectedItem = optionNode => (
-      <div style={{ display: 'flex', alignItems: 'center' }} className="custom-option-render">
-        <Icon svg={<IconNumber />} />
-        <span style={{ marginLeft: 8 }}>{optionNode.label}{optionNode.placeholder}</span>
+        <span style={{ marginLeft: 8 }}>{(optionNode as any).label}</span>
       </div>
   );
 
@@ -207,7 +200,7 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
       empty,
       emptyContent,
       ...rest
-    } = renderProps;
+    } = renderProps as any;
     const optionCls = classNames({
       ['custom-option-render']: true,
       ['custom-option-render-focused']: focused,
@@ -253,7 +246,7 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
       inputValue,
       type,
       ...rest
-    } = renderProps;
+    } = renderProps as any;
     const optionCls = classNames({
       ['custom-option-render']: true,
       ['custom-option-render-focused']: focused,
@@ -309,7 +302,6 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
             })}
             defaultValue={dataRangeId}
             value={dataRangeId}
-            initValue={dataRangeId}
             onChange={ (value) => {
               datasourceRangeChange(value as string)
             }}>

@@ -87,7 +87,7 @@ export default function MainConfigPanel({ setRenderData, initializeConfig }: IPr
   // 给初始创建的 面板初始化渲染数据，这个时候需要遍历所有表找到符合要求的数据
   const initRenderDataForCreateIfNeeded = async ( tableList: { value: string, label: string }[],
                                                   config :ICustomConfig) => {
-    const findAvailableTableInfo = await findAvailableTableForRender(tableList, 0);
+    const findAvailableTableInfo: { tableId: string, fields: any[] } | undefined = await findAvailableTableForRender(tableList, 0);
     if (!findAvailableTableInfo) {
       return
     }
