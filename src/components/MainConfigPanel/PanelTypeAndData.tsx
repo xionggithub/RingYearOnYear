@@ -140,6 +140,20 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
     return ids;
   }
 
+  const renderTableSelectedItem = optionNode => (
+      <div style={{ display: 'flex', alignItems: 'center' }} className="custom-option-render">
+        <Icon svg={<IconTable />} />
+        <span style={{ marginLeft: 8 }}>{optionNode.label}</span>
+      </div>
+  );
+
+  const renderFieldSelectedItem = optionNode => (
+      <div style={{ display: 'flex', alignItems: 'center' }} className="custom-option-render">
+        <Icon svg={<IconNumber />} />
+        <span style={{ marginLeft: 8 }}>{optionNode.label}{optionNode.placeholder}</span>
+      </div>
+  );
+
   const renderFieldOptionIcon = (type: number) => {
     // 1 文本，3 单选  11 人员  19 查找引用  20公式
     switch (type) {
@@ -246,10 +260,11 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
       <div className="form-title">{t('dataSource')}</div>
       <div className='form-item' key='dataSource'>
         <Select
+            filter
             style={{width : '100%'}}
-            prefix={<Icon svg={<IconTable />} />}
             optionList={tableList}
             value={tableId}
+            renderSelectedItem={renderTableSelectedItem}
             renderOptionItem={renderTableOptionItem}
             onChange={tableChange}>
         </Select>
@@ -257,7 +272,8 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
       <div className="form-title">{t('dataRange')}</div>
       <div className='form-item'>
         <Select
-            prefix={<Icon svg={<IconTable />} />}
+            filter
+            renderSelectedItem={renderTableSelectedItem}
             renderOptionItem={renderTableOptionItem}
             optionList={dataRange.map(item => {
               if (item.type === SourceType.ALL) {
