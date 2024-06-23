@@ -67,7 +67,8 @@ export default function MainConfigPanel({ setRenderData, initializeConfig }: IPr
   }, []);
 
 
-  const findAvailableTableForRender = async (tableList: { value: string, label: string }[], index: number) => {
+  // "noImplicitAny": false,
+  const findAvailableTableForRender = async (tableList: { value: string, label: string }[], index: number): Promise<{ tableId: string, fields: any[] } | undefined> => {
     let result: { tableId: string, fields: any[] } | undefined = undefined;
     const findTableItem = tableList[index];
     if (!findTableItem) return  undefined;

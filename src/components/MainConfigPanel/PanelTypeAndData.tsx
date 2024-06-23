@@ -159,10 +159,10 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
     return ids;
   }
 
-  const renderTableSelectedItem = optionNode => (
+  const renderTableSelectedItem = (optionNode: any) => (
       <div style={{ display: 'flex', alignItems: 'center' }} className="custom-option-render">
         <Icon svg={<IconTable />} />
-        <span style={{ marginLeft: 8 }}>{(optionNode as any).label}</span>
+        <span style={{ marginLeft: 8 }}>{optionNode.label}</span>
       </div>
   );
 
@@ -186,7 +186,7 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
     }
   }
 
-  const renderTableOptionItem = renderProps => {
+  const renderTableOptionItem = (renderProps: any) => {
     const {
       disabled,
       selected,
@@ -231,7 +231,7 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
     return cls.join(' ');
   }
 
-  const renderFieldOptionItem = renderProps => {
+  const renderFieldOptionItem = (renderProps: any) => {
     const {
       disabled,
       selected,
