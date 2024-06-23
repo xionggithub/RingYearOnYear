@@ -380,7 +380,7 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
       </div>
       {
         (config.momOrYoy ?? []).map((item, index) => (
-          <div className='form-item bg-grey' key={index}>
+          <div className='form-item bg-grey field-card' key={index}>
             {config.momOrYoy.length > 1 && (
               <div className='icon-delete' onClick={() => { deleteMomOrYoyItem(index) }}>
                 <IconDeleteStroked size='small' />

@@ -67,10 +67,19 @@
   font-weight: 500;
   margin-top: 8px;
 }
+
+.field-card {
+  background-color: var(--card-bg-color);
+  border: 1px solid var(--card-bord-color);
+  border-radius: 6px;
+  padding: 0 8px 8px 8px;
+  margin-top: 10px;
+}
 .form-item{
   position: relative;
   display: flex;
   flex-direction: column;
+
   .icon-delete{
     position: absolute;
     right: 10px;
@@ -179,4 +188,16 @@
 
 .semi-select-selection-placeholder {
   opacity: 0.6;
+}
+
+.selection-card {
+  width: 100%;
+  height: max-content;
+  display: flex;
+  flex-direction: column;
+  border-radius: 6px;
+  padding: 8px;
+  gap: 6px;
+  background-color: var(--card-bg-color);
+  border: 1px solid var(--card-bord-color);
 }
