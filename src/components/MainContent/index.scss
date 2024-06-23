@@ -33,6 +33,7 @@
       font-size: var(--number-font-size);
       font-weight: bold;
       margin-bottom: var(--number-margin-bottom);
+      transition: font-size .3s linear;
     }
 
     .main-content-description {
@@ -43,6 +44,7 @@
       line-height: var(--description-line-height);
       padding-bottom: var(--description-padding-bottom);
       font-weight: 500;
+      transition: font-size .3s linear;
 
       .description-text {
         color: var(--ccm-chart-N1000);
