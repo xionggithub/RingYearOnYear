@@ -187,3 +187,11 @@
 .semi-select-option-disabled .semi-icon svg path {
   fill: var(--svg-path-fill-disable);
 }
+
+.custom-option-render {
+  color: var(--option-color);
+}
+
+.semi-select-selection-placeholder {
+  opacity: 0.6;
+}

@@ -4,12 +4,21 @@ import {useTranslation} from 'react-i18next';
 import {Button, Divider, Input, Form, Select, Dropdown, Tag} from '@douyinfe/semi-ui';
 import Icon, {IconDeleteStroked, IconPlus} from '@douyinfe/semi-icons';
 import type {ICategory} from '@lark-base-open/js-sdk';
+import { IconTick } from '@douyinfe/semi-icons';
+
 import {base, dashboard, IDataRange, Rollup, SourceType} from "@lark-base-open/js-sdk";
 import {ICustomConfig, ITableItem, MomOrYoy, MomOrYoyCalcMethod, MomOrYoyCalcType, Mutable} from '@/common/type';
 import {momOrYoyCalcTypeList} from '@/common/constant';
 import {getMomYoyDesc, getNewMomOrYoyCalcMethodList} from '@/utils';
 import IconTable from '@/assets/icon_table.svg?react';
 import IconNumber from '@/assets/icon_number.svg?react';
+import IconPerson from '../../assets/icon_person.svg?react';
+
+import IconText from '../../assets/icon_text.svg?react';
+import IconSelect from '../../assets/icon_select.svg?react';
+import IconFunction from '../../assets/icon_function.svg?react';
+import IconFindReference from '../../assets/icon_find_reference.svg?react';
+
 
 interface IProps {
   config: ICustomConfig;
@@ -56,7 +65,7 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
     setTableId(tableId)
     const datasourceRange = await dashboard.getTableDataRange(tableId);
     setDataRange(datasourceRange)
-    config.datasourceRange = ''
+    config.datasourceRange = 'All'
     setConfig({...config })
     setDataRangeId('All')
     const table = await base.getTable(tableId);
@@ -131,6 +140,107 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
     return ids;
   }
 
+  const renderFieldOptionIcon = (type: number) => {
+    // 1 文本，3 单选  11 人员  19 查找引用  20公式
+    switch (type) {
+      case 1:
+        return (<Icon svg={<IconText />} />)
+      case 2:
+        return (<Icon svg={<IconNumber />} />)
+      case 3:
+        return (<Icon svg={<IconSelect />} />)
+      case 11:
+        return (<Icon svg={<IconPerson />} />)
+      case 19:
+        return (<Icon svg={<IconFindReference />} />)
+      case 20:
+        return (<Icon svg={<IconFunction />} />)
+      default:
+        return (<Icon svg={<IconText />} />)
+    }
+  }
+
+  const renderTableOptionItem = renderProps => {
+    const {
+      disabled,
+      selected,
+      label,
+      value,
+      focused,
+      className,
+      style,
+      onMouseEnter,
+      onClick,
+      empty,
+      emptyContent,
+      ...rest
+    } = renderProps;
+    const optionCls = classNames({
+      ['custom-option-render']: true,
+      ['custom-option-render-focused']: focused,
+      ['custom-option-render-disabled']: disabled,
+      ['custom-option-render-selected']: selected,
+    });
+    // const searchWords = [inputValue];
+    return (
+        <div style={{ ...style, ...{ display: 'flex', flexDirection: 'row', padding: '8px 12px', cursor:'pointer', alignItems: 'center',} }}
+             className={optionCls}
+             onClick={() => onClick()}
+             onMouseEnter={e => onMouseEnter()}>
+          <Icon svg={<IconTable />} />
+          <span style={{ marginLeft: 8 }}>{label}</span>
+          { selected ? (<IconTick style={{ marginLeft: 'auto', marginRight: '0' }}>
+          </IconTick>) : '' }
+        </div>
+    );
+  };
+
+  const classNames: (options: { [key: string]: boolean }) => string = (options: { [key: string]: boolean }) => {
+    let cls: string[] = [];
+    Object.keys(options).forEach(key => {
+      if (options[key]) {
+        cls.push(key)
+      }
+    });
+    return cls.join(' ');
+  }
+
+  const renderFieldOptionItem = renderProps => {
+    const {
+      disabled,
+      selected,
+      label,
+      value,
+      focused,
+      style,
+      onMouseEnter,
+      onClick,
+      empty,
+      emptyContent,
+      inputValue,
+      type,
+      ...rest
+    } = renderProps;
+    const optionCls = classNames({
+      ['custom-option-render']: true,
+      ['custom-option-render-focused']: focused,
+      ['custom-option-render-disabled']: disabled,
+      ['custom-option-render-selected']: selected,
+    });
+    return  (inputValue.length === 0 || label.toUpperCase().includes(inputValue.toUpperCase())) ? (
+        <div
+            style={{ ...style, ...{ opacity: disabled ? '0.6':'1.0', display: 'flex', flexDirection: 'row', padding: '8px 12px', cursor:'pointer', alignItems: 'center', } }}
+            className={optionCls}
+            onClick={() => onClick()}
+            onMouseEnter={e => onMouseEnter()}>
+          { renderFieldOptionIcon(type) }
+          <span style={{ marginLeft: 8 }}>{label}</span>
+          { selected ? (<IconTick style={{ marginLeft: 'auto', marginRight: '0' }}>
+          </IconTick>) : '' }
+        </div>
+    ) : ''
+  };
+
   return (
     <div className="form-main">
       <div className="form-title">{t('dataSource')}</div>
@@ -140,13 +250,15 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
             prefix={<Icon svg={<IconTable />} />}
             optionList={tableList}
             value={tableId}
+            renderOptionItem={renderTableOptionItem}
             onChange={tableChange}>
         </Select>
       </div>
       <div className="form-title">{t('dataRange')}</div>
-      <div className='form-item' key="dataRange">
+      <div className='form-item'>
         <Select
             prefix={<Icon svg={<IconTable />} />}
+            renderOptionItem={renderTableOptionItem}
             optionList={dataRange.map(item => {
               if (item.type === SourceType.ALL) {
                 return {
@@ -162,6 +274,7 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
             })}
             defaultValue={dataRangeId}
             value={dataRangeId}
+            initValue={dataRangeId}
             onChange={ (value) => {
               datasourceRangeChange(value as string)
             }}>
@@ -176,6 +289,7 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
             placeholder={t('key_indicators')}
             prefix={<Icon svg={<IconNumber />} />}
             showArrow={false}
+            filter
             suffix={
               <Dropdown
                   className='select-suffix'
@@ -218,9 +332,11 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
               return {
                 value: item.id,
                 label: item.name,
+                type: item.type,
                 disabled: item.type !== 2 || ids.some(id => id === item.id)
               };
           })}
+            renderOptionItem={renderFieldOptionItem}
         />
       </div>
 
@@ -251,15 +367,18 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
               position='top'
               defaultValue={item.momOrYoyFieldId}
               value={item.momOrYoyFieldId}
+              filter
               onChange={(value) =>  momOrYoyItemChange(item, 'momOrYoyFieldId', value, index)}
               optionList={currentFields.map(item => {
                 const ids = selectedFieldIds()
                 return {
                   value: item.id,
                   label: item.name,
+                  type: item.type,
                   disabled: item.type !== 2 || ids.some(id => id === item.id)
                 };
               })}
+              renderOptionItem={renderFieldOptionItem}
               showArrow={false}
               suffix={
                 <Dropdown
