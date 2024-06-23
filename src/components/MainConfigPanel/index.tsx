@@ -66,6 +66,44 @@ export default function MainConfigPanel({ setRenderData, initializeConfig }: IPr
     return resultList;
   }, []);
 
+
+  const findAvailableTableForRender = async (tableList: { value: string, label: string }[], index: number) => {
+    let result: { tableId: string, fields: any[] } | undefined = undefined;
+    const findTableItem = tableList[index];
+    if (!findTableItem) return  undefined;
+    const table = await base.getTable(findTableItem.value);
+    const fields = (await table.getFieldMetaList()) as any[]
+    // 找到 有两个以上 数字字段的表
+    const numberFields = fields.filter(field => field.type === 2)
+    if (numberFields.length >= 2) {
+      result = { tableId: findTableItem.value, fields: fields };
+      return result
+    }
+    if (index < tableList.length - 1) {
+      return await findAvailableTableForRender(tableList, index + 1);
+    }
+    return undefined;
+  }
+  // 给初始创建的 面板初始化渲染数据，这个时候需要遍历所有表找到符合要求的数据
+  const initRenderDataForCreateIfNeeded = async ( tableList: { value: string, label: string }[],
+                                                  config :ICustomConfig) => {
+    const findAvailableTableInfo = await findAvailableTableForRender(tableList, 0);
+    if (!findAvailableTableInfo) {
+      return
+    }
+    config.tableId = findAvailableTableInfo.tableId
+    const datasourceRange = await dashboard.getTableDataRange(config.tableId)
+    setDatasourceRange(datasourceRange)
+    if (!config.datasourceRange) {
+      config.datasourceRange = 'All'
+    }
+    const numberFields = findAvailableTableInfo.fields.filter(field => field.type === 2)
+    config.keyIndicatorsFieldId = numberFields[0].id
+    config.momOrYoy[0].momOrYoyFieldId = numberFields[1].id;
+    setTableFields(findAvailableTableInfo.fields)
+    setConfig({...config})
+  }
+
   const initData = async () => {
     const tableList = await getTableList();
     console.log(tableList, '----');
@@ -74,6 +112,8 @@ export default function MainConfigPanel({ setRenderData, initializeConfig }: IPr
     if (dashboard.state === DashboardState.Create || customConfig.tableId.length ===0) {
       // 创建状态，无任务配置
       customConfig.tableId = tableList[0]?.value as string;
+      await initRenderDataForCreateIfNeeded(tableList, customConfig);
+      console.log(customConfig, '渲染初始化数据');
     }
     if (!customConfig.tableId) {
       setConfig({...customConfig})

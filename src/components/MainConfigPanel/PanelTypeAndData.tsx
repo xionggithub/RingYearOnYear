@@ -53,6 +53,10 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
   }, [config.datasourceRange])
 
   useEffect(() => {
+    setKeyIndicatorsFieldId(config.keyIndicatorsFieldId)
+  }, [config.keyIndicatorsFieldId])
+
+  useEffect(() => {
     setCurrentFields(tableFields)
   }, [tableFields])
 
@@ -65,13 +69,28 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
     setTableId(tableId)
     const datasourceRange = await dashboard.getTableDataRange(tableId);
     setDataRange(datasourceRange)
+    config.keyIndicatorsFieldId = '';
     config.datasourceRange = 'All'
-    setConfig({...config })
+    config.momOrYoy.forEach(item => {
+      item.momOrYoyFieldId = '';
+    })
+    setKeyIndicatorsFieldId('')
     setDataRangeId('All')
     const table = await base.getTable(tableId);
     const tableFields = (await table.getFieldMetaList()) as any[]
     setCurrentFields(tableFields)
-    setKeyIndicatorsFieldId('')
+    // 预设初始值
+    const numberFields = tableFields.filter(field => field.type === 2)
+    numberFields.forEach((field, index) => {
+      if (index === 0) {
+        config.keyIndicatorsFieldId = numberFields[0].id
+      } else if (index - 1 < config.momOrYoy.length) {
+        config.momOrYoy[index-1].momOrYoyFieldId = numberFields[index].id
+      }
+    })
+    console.log(config, 'after change table-----------')
+    setConfig({...config })
+
   }
 
   const datasourceRangeChange = (range: string) => {
