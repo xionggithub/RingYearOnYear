@@ -411,7 +411,7 @@ export const getConfig = async () => {
   const customConfig = res.customConfig as any;
   if (dataConditions.length > 0) {
     const firstCondition = dataConditions[0];
-    if (firstCondition.tableId && !customConfig.tableId.length) {
+    if (firstCondition.tableId) {
       customConfig.tableId = firstCondition.tableId
     }
   }
