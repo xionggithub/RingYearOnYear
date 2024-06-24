@@ -390,14 +390,20 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
             </Dropdown>}
             defaultValue={keyIndicatorsFieldId}
             value={keyIndicatorsFieldId}
-            onChange={(value) => { handlerChange('keyIndicatorsFieldId', value) }}
+            onSelect={ (value) => {
+              if (keyIndicatorsFieldId === value) {
+                handlerChange('keyIndicatorsFieldId', '')
+              } else {
+                handlerChange('keyIndicatorsFieldId', value)
+              }
+            }}
             optionList={currentFields.map(item => {
-              const ids = selectedFieldIds()
+              // const ids = selectedFieldIds()
               return {
                 value: item.id,
                 label: item.name,
                 type: item.type,
-                disabled: item.type !== 2 || ids.some(id => id === item.id)
+                disabled: item.type !== 2
               };
           })}
             renderOptionItem={renderFieldOptionItem}
@@ -432,14 +438,19 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
               defaultValue={item.momOrYoyFieldId}
               value={item.momOrYoyFieldId}
               filter
-              onChange={(value) =>  momOrYoyItemChange(item, 'momOrYoyFieldId', value, index)}
+              onSelect={ (value) => {
+                if (item.momOrYoyFieldId === value) {
+                  momOrYoyItemChange(item, 'momOrYoyFieldId', '', index)
+                } else {
+                  momOrYoyItemChange(item, 'momOrYoyFieldId', value, index)
+                }
+              }}
               optionList={currentFields.map(item => {
-                const ids = selectedFieldIds()
                 return {
                   value: item.id,
                   label: item.name,
                   type: item.type,
-                  disabled: item.type !== 2 || ids.some(id => id === item.id)
+                  disabled: item.type !== 2
                 };
               })}
               renderOptionItem={renderFieldOptionItem}
@@ -459,7 +470,6 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
                                                    const data = (event.target as any).textContent;
                                                    const findItem = methodList.find(tempItem => t(tempItem.keyOfName) === data);
                                                    if (findItem) {
-                                                     console.log(findItem.type)
                                                      momOrYoyItemChange(item, 'indicatorsRollup', findItem.type, index)
                                                      setConfig({...config })
                                                    }
