@@ -110,9 +110,11 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
     if (key === 'momOrYoyDesc') {
       item.manualSetDesc = true;
     }
-    const manualSetDesc: any = momOrYoyCalcTypeList.find(optionItem =>optionItem.value === item.momOrYoyCalcType)
-    if (manualSetDesc) {
-      item.momOrYoyDesc = manualSetDesc.label;
+    if (key === 'momOrYoyCalcType') {
+      const manualSetDesc: any = momOrYoyCalcTypeList.find(optionItem =>optionItem.value === item.momOrYoyCalcType)
+      if (manualSetDesc) {
+        item.momOrYoyDesc = manualSetDesc.label;
+      }
     }
     config.momOrYoy[index] = item;
     setConfig({ ...config });
@@ -260,6 +262,41 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
             onClick={() => onClick()}
             onMouseEnter={e => onMouseEnter()}>
           { renderFieldOptionIcon(type) }
+          <span style={{ marginLeft: 8 }}>{label}</span>
+          { selected ? (<IconTick style={{ marginLeft: 'auto', marginRight: '0' }}>
+          </IconTick>) : '' }
+        </div>
+    ) : ''
+  };
+
+  const renderCalculationTypeOptionItem = (renderProps: any) => {
+    const {
+      disabled,
+      selected,
+      label,
+      value,
+      focused,
+      style,
+      onMouseEnter,
+      onClick,
+      empty,
+      emptyContent,
+      inputValue,
+      type,
+      ...rest
+    } = renderProps as any;
+    const optionCls = classNames({
+      ['custom-option-render']: true,
+      ['custom-option-render-focused']: focused,
+      ['custom-option-render-disabled']: disabled,
+      ['custom-option-render-selected']: selected,
+    });
+    return  (inputValue.length === 0 || label.toUpperCase().includes(inputValue.toUpperCase())) ? (
+        <div
+            style={{ ...style, ...{ opacity: disabled ? '0.6':'1.0', display: 'flex', flexDirection: 'row', padding: '8px 12px', cursor:'pointer', alignItems: 'center', } }}
+            className={optionCls}
+            onClick={() => onClick()}
+            onMouseEnter={e => onMouseEnter()}>
           <span style={{ marginLeft: 8 }}>{label}</span>
           { selected ? (<IconTick style={{ marginLeft: 'auto', marginRight: '0' }}>
           </IconTick>) : '' }
@@ -450,6 +487,7 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
             <Select
               position='top'
               optionList={momOrYoyCalcTypeList as Mutable<typeof momOrYoyCalcTypeList>}
+              renderOptionItem={renderCalculationTypeOptionItem}
               defaultValue={item.momOrYoyCalcType}
               value={item.momOrYoyCalcType}
               onChange={(value) => momOrYoyItemChange(item, 'momOrYoyCalcType', value, index)}>
