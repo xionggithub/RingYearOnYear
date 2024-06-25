@@ -42,6 +42,9 @@ export default function MainContent({ renderData, mainDomRef }: IProps) {
   }
 
   useEffect(() => {
+    setTimeout(() => {
+      dashboard.setRendered().then()
+    }, 3000)
     resizeHandler();
     window.addEventListener('resize', resizeHandler);
     return () => {
