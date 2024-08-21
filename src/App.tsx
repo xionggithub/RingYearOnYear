@@ -44,7 +44,15 @@ export default function App() {
             await renderMainContentData(customConfig, value, setRenderData);
         } else {
             // 保存数据异常则不处理
+            console.log("render error0-----")
         }
+        // 渲染完通知 宿主
+        setTimeout(() => {
+            console.log('------------------------------------------------------渲染完成 ');
+            dashboard.setRendered().then( res => {
+                console.log('set rendered: ',res);
+            })
+        }, 1000);
     }
 
     // 展示态
