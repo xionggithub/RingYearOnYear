@@ -57,9 +57,12 @@ export default function App() {
 
     // 展示态
     useEffect(() => {
-        bitable.bridge.getTheme().then((theme: string) => {
-            setTheme(theme)
-        })
+        dashboard.getTheme().then((theme) => {
+            setTheme(theme.theme)
+        });
+        // bitable.bridge.getTheme().then((theme: string) => {
+        //     setTheme(theme)
+        // })
         if (DashboardState.Create !== dashboard.state) {
             renderMain().then(() => {
                 setIsLoading(false)

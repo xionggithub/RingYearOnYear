@@ -477,9 +477,9 @@
     "@jridgewell/resolve-uri" "^3.1.0"
     "@jridgewell/sourcemap-codec" "^1.4.14"
 
-"@lark-base-open/js-sdk@https://lf3-static.bytednsdoc.com/obj/eden-cn/jjjpceh7nulojvhj/@lark-base-open-js-sdk-0.4.0-alpha.12.tgz":
-  version "0.4.0-alpha.12"
-  resolved "https://lf3-static.bytednsdoc.com/obj/eden-cn/jjjpceh7nulojvhj/@lark-base-open-js-sdk-0.4.0-alpha.12.tgz#65291464cc0b3d49f1936eb8f61a47b2b015fb98"
+"@lark-base-open/js-sdk@https://lf3-static.bytednsdoc.com/obj/eden-cn/jjjpceh7nulojvhj/@lark-base-open-js-sdk-0.4.1-beta.5.tgz":
+  version "0.4.1-beta.5"
+  resolved "https://lf3-static.bytednsdoc.com/obj/eden-cn/jjjpceh7nulojvhj/@lark-base-open-js-sdk-0.4.1-beta.5.tgz#93ecac64b6cf84f70f60dc3700c54aeadc75caf1"
 
 "@remix-run/router@1.16.1":
   version "1.16.1"

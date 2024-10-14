@@ -9,12 +9,17 @@ function updateTheme(theme: string) {
 /** 跟随主题色变化 */
 export function useTheme() {
   useLayoutEffect(() => {
-    bitable.bridge.getTheme().then((theme: string) => {
-      updateTheme(theme.toLocaleLowerCase());
-    })
-
-    bitable.bridge.onThemeChange((e) => {
-      updateTheme(e.data.theme.toLocaleLowerCase());
+    // bitable.bridge.getTheme().then((theme: string) => {
+    //   updateTheme(theme.toLocaleLowerCase());
+    // })
+    // bitable.bridge.onThemeChange((e) => {
+    //   updateTheme(e.data.theme.toLocaleLowerCase());
+    // })
+    dashboard.getTheme().then((theme) => {
+      updateTheme(theme.theme.toLocaleLowerCase())
+    });
+    dashboard.onThemeChange((theme) => {
+      updateTheme(theme.data.theme.toLocaleLowerCase());
     })
   }, [])
 }

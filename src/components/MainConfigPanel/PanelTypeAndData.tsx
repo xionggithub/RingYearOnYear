@@ -413,7 +413,7 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
       <div className="form-title">
         <span>{t('auxiliary_index')}</span>
         <Button
-          disabled={config.momOrYoy.length >= 4}
+          disabled={config.momOrYoy?.length >= 4}
           theme='borderless'
           icon={<IconPlus size='small' />}
           style={{ fontWeight: 'normal' }}
@@ -424,7 +424,7 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
       {
         (config.momOrYoy ?? []).map((item, index) => (
           <div className='form-item bg-grey field-card' key={index}>
-            {config.momOrYoy.length > 1 && (
+            {config.momOrYoy?.length > 1 && (
               <div className='icon-delete' onClick={() => { deleteMomOrYoyItem(index) }}>
                 <IconDeleteStroked size='small' />
               </div>
