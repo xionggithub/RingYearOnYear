@@ -8,7 +8,7 @@ import { IconTick } from '@douyinfe/semi-icons';
 
 import {base, dashboard, IDataRange, Rollup, SourceType} from "@lark-base-open/js-sdk";
 import {ICustomConfig, ITableItem, MomOrYoy, MomOrYoyCalcMethod, MomOrYoyCalcType, Mutable} from '@/common/type';
-import {momOrYoyCalcTypeList} from '@/common/constant';
+import { momOrYoyCalcTypeList, numberFieldTypes } from '@/common/constant';
 import {getMomYoyDesc, getNewMomOrYoyCalcMethodList} from '@/utils';
 import IconTable from '@/assets/icon_table.svg?react';
 import IconNumber from '@/assets/icon_number.svg?react';
@@ -57,6 +57,7 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
   }, [config.keyIndicatorsFieldId])
 
   useEffect(() => {
+    console.log(tableFields, '------------ table fields init');
     setCurrentFields(tableFields)
   }, [tableFields])
 
@@ -78,9 +79,10 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
     setDataRangeId('All')
     const table = await base.getTable(tableId);
     const tableFields = (await table.getFieldMetaList()) as any[]
+    console.log(tableFields, '------------ table fields table change');
     setCurrentFields(tableFields)
     // 预设初始值
-    const numberFields = tableFields.filter(field => field.type === 2)
+    const numberFields = tableFields.filter(field =>  numberFieldTypes.some(type => type === field.type))
     numberFields.forEach((field, index) => {
       if (index === 0) {
         config.keyIndicatorsFieldId = numberFields[0].id
@@ -403,7 +405,7 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
                 value: item.id,
                 label: item.name,
                 type: item.type,
-                disabled: item.type !== 2
+                disabled: !numberFieldTypes.some(type =>  type === item.type)
               };
           })}
             renderOptionItem={renderFieldOptionItem}
@@ -450,7 +452,7 @@ export default function PanelTypeAndData({ config, datasourceRange, setConfig, t
                   value: item.id,
                   label: item.name,
                   type: item.type,
-                  disabled: item.type !== 2
+                  disabled: !numberFieldTypes.some(type =>  type === item.type)
                 };
               })}
               renderOptionItem={renderFieldOptionItem}

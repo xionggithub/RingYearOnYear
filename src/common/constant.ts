@@ -206,6 +206,9 @@ export const icons = {
   IconArrowDownRight
 } as const;
 
+// 2 数字  99003 货币  20 公式
+export const numberFieldTypes = [2, 99003, 20]
+
 export const dataFormatList: { label: string, value: string }[] = [
   {
     label: t('numberMillennials'),

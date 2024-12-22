@@ -11,6 +11,7 @@ import type { ICustomConfig, IRenderData, ITableItem } from '@/common/type';
 import { useConfig } from '@/hooks';
 import { configFormatter, getPreviewData, renderMainContentData } from '@/utils';
 import { debounce } from 'lodash-es';
+import { numberFieldTypes } from "@/common/constant";
 
 interface IProps {
   setRenderData: (data: IRenderData) => void;
@@ -75,7 +76,7 @@ export default function MainConfigPanel({ setRenderData, initializeConfig }: IPr
     const table = await base.getTable(findTableItem.value);
     const fields = (await table.getFieldMetaList()) as any[]
     // 找到 有两个以上 数字字段的表
-    const numberFields = fields.filter(field => field.type === 2)
+    const numberFields = fields.filter(field =>  numberFieldTypes.some(type => type === field.type))
     if (numberFields.length >= 2) {
       result = { tableId: findTableItem.value, fields: fields };
       return result
@@ -98,7 +99,7 @@ export default function MainConfigPanel({ setRenderData, initializeConfig }: IPr
     if (!config.datasourceRange) {
       config.datasourceRange = 'All'
     }
-    const numberFields = findAvailableTableInfo.fields.filter(field => field.type === 2)
+    const numberFields = findAvailableTableInfo.fields.filter(field => numberFieldTypes.some(type => type === field.type))
     config.keyIndicatorsFieldId = numberFields[0].id
     config.momOrYoy[0].momOrYoyFieldId = numberFields[1].id;
     setTableFields(findAvailableTableInfo.fields)

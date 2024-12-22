@@ -445,6 +445,7 @@ export const getPreviewData = async (customConfig: ICustomConfig) => {
     const resultItem = data[1]?.map(item => item.value as number);
     result.push(resultItem?.length ? resultItem[0] : 0);
   }
+  console.log('getPreviewData result-------------', result)
   return result;
 }
 
